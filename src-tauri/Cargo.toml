@@ -1,0 +1,54 @@
+[package]
+name = "simple-2fa-next"
+version = "0.1.0"
+description = "Simple 2FA Next — Modern TOTP Authenticator"
+authors = []
+edition = "2021"
+
+[lib]
+name = "simple_2fa_next_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-updater = "2"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Database
+rusqlite = { version = "0.34", features = ["bundled"] }
+
+# TOTP
+totp-rs = { version = "5", features = ["gen_secret", "zeroize"] }
+data-encoding = "2"  # Base32 decoding
+
+# Cryptography
+aes-gcm = "0.10"
+argon2 = "0.5"
+rand = "0.8"
+hex = "0.4"
+zeroize = { version = "1", features = ["derive"] }
+secrecy = { version = "0.8", features = ["serde"] }
+
+# Error handling
+thiserror = "2"
+
+# Async
+tokio = { version = "1", features = ["full"] }
+
+[dev-dependencies]
+proptest = "1"
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

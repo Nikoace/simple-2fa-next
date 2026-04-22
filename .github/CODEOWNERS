@@ -1,0 +1,10 @@
+# Global fallback
+* @niko
+
+# Crypto and importer — security-sensitive, require extra review
+/src-tauri/src/crypto/ @niko
+/src-tauri/src/importer/ @niko
+/src-tauri/src/biometric/ @niko
+
+# CI/CD pipelines
+/.github/workflows/ @niko

@@ -69,10 +69,9 @@ export function AccountCard({ account, className }: Props) {
       </button>
 
       <DropdownMenu>
-        <DropdownMenuTrigger>
+        <DropdownMenuTrigger aria-label="options">
           <span className="rounded p-1 text-muted-foreground hover:bg-muted">
             <MoreVertical className="size-4" />
-            <span className="pl-1 text-xs">options</span>
           </span>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="right-0">

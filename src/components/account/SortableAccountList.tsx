@@ -14,6 +14,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useQueryClient } from "@tanstack/react-query";
+import { GripVertical } from "lucide-react";
 
 import { type AccountWithCode, reorderAccounts } from "@/lib/tauri";
 
@@ -28,11 +29,20 @@ function SortableItem({ account }: { account: AccountWithCode }) {
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={isDragging ? "opacity-50" : undefined}
+      className={`flex items-center gap-1${isDragging ? " opacity-50" : ""}`}
       {...attributes}
-      {...listeners}
     >
-      <AccountCard account={account} />
+      <button
+        type="button"
+        aria-label="drag to reorder"
+        className="cursor-grab touch-none p-1 text-muted-foreground/50 hover:text-muted-foreground active:cursor-grabbing"
+        {...listeners}
+      >
+        <GripVertical className="size-4" />
+      </button>
+      <div className="min-w-0 flex-1">
+        <AccountCard account={account} />
+      </div>
     </div>
   );
 }
@@ -55,11 +65,15 @@ export function SortableAccountList({ accounts }: Props) {
       return;
     }
 
+    const previous = qc.getQueryData<AccountWithCode[]>(["accounts"]);
     const reordered = arrayMove(accounts, oldIndex, newIndex);
 
     qc.setQueryData<AccountWithCode[]>(["accounts"], reordered);
-    await reorderAccounts(reordered.map((account) => account.id));
-    await qc.invalidateQueries({ queryKey: ["accounts"] });
+    try {
+      await reorderAccounts(reordered.map((account) => account.id));
+    } catch {
+      qc.setQueryData<AccountWithCode[]>(["accounts"], previous);
+    }
   }
 
   return (

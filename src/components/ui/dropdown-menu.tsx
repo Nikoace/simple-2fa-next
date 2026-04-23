@@ -30,11 +30,15 @@ export function DropdownMenu({ children }: { children: ReactNode }) {
   return <DropdownCtx.Provider value={value}>{children}</DropdownCtx.Provider>;
 }
 
-export function DropdownMenuTrigger({ children }: { asChild?: boolean; children: ReactNode }) {
+export function DropdownMenuTrigger({
+  children,
+  asChild: _asChild,
+  ...rest
+}: HTMLAttributes<HTMLButtonElement> & { asChild?: boolean; children: ReactNode }) {
   const { open, setOpen } = useDropdownCtx();
 
   return (
-    <button type="button" onClick={() => setOpen(!open)} aria-expanded={open}>
+    <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} {...rest}>
       {children}
     </button>
   );

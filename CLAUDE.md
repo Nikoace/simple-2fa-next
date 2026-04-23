@@ -75,6 +75,12 @@ simple-2fa-next/
 - Path alias `@/` = `src/`
 - Theme: CSS variables via Tailwind v4 `@theme`, `<html class="dark">` toggle
 
+### Frontend Patterns (Lessons Learned)
+- **Test selectors — use `aria-label`, never visible text workarounds**: Do not insert visible text (e.g. `<span>options</span>`) solely to make `getByRole` pass. Add `aria-label` to the element and query by that. Also verify the UI component actually forwards HTML attributes — lightweight custom components (e.g. `DropdownMenuTrigger`) may not spread `...rest` and will silently drop `aria-label`.
+- **Optimistic updates must have rollback**: When using `queryClient.setQueryData` for optimistic UI, always save the previous value first and restore it in a `catch` block. Do not call `invalidateQueries` after a successful optimistic update — the in-memory state is already correct and the extra refetch causes unnecessary flicker.
+- **dnd-kit: use a dedicated drag handle**: Spread `{...listeners}` only onto a small grip icon button, never onto the entire card wrapper. Putting listeners on the whole card lets the drag sensor intercept clicks on interactive children (menus, buttons), breaking them on touch devices.
+- **`DialogDescription` must be meaningful or absent**: Never reuse an unrelated i18n key (e.g. a field label or a hint from another screen) as a `DialogDescription`. Use a real description string or omit the component entirely.
+
 ### Backup Compatibility (CRITICAL)
 - `src-tauri/src/crypto/legacy_s2fa.rs` must remain a 1:1 copy of the v1 format
 - Never change the v1 decrypt path (magic=S2FA_ENC, Argon2id m=65536 t=3 p=4, AES-256-GCM)

@@ -81,7 +81,7 @@ describe("AccountCard", () => {
   it("shows edit and delete options in dropdown menu", async () => {
     const user = userEvent.setup();
     render(<AccountCard account={account} />);
-    await user.click(screen.getByRole("button", { name: /options/i }));
+    await user.click(screen.getByRole("button", { name: "options" }));
     expect(screen.getByText(/edit|编辑/i)).toBeTruthy();
     expect(screen.getByText(/delete|删除/i)).toBeTruthy();
   });

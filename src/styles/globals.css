@@ -60,9 +60,59 @@
     border-color: var(--color-border);
   }
   body {
-    background-color: var(--color-background);
+    background:
+      radial-gradient(circle at 0% 0%, hsl(195 100% 94%) 0%, transparent 45%),
+      radial-gradient(circle at 100% 100%, hsl(44 100% 91%) 0%, transparent 40%),
+      var(--color-background);
     color: var(--color-foreground);
-    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-family: "Manrope", "Noto Sans SC", "Noto Sans JP", ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
+}
+
+.countdown-ring {
+  --ring-size: 2.5rem;
+  --ring-width: 0.22rem;
+  height: var(--ring-size);
+  width: var(--ring-size);
+  border-radius: 9999px;
+  background:
+    conic-gradient(
+      hsl(194 98% 42%) var(--ring-progress),
+      hsl(210 20% 92%) 0
+    );
+  position: relative;
+  transition: --ring-progress 200ms linear;
+}
+
+.countdown-ring::after {
+  content: "";
+  position: absolute;
+  inset: var(--ring-width);
+  border-radius: inherit;
+  background: var(--color-card);
+}
+
+.countdown-ring--danger {
+  background:
+    conic-gradient(
+      hsl(1 83% 63%) var(--ring-progress),
+      hsl(210 20% 92%) 0
+    );
+}
+
+.dark .countdown-ring {
+  background:
+    conic-gradient(
+      hsl(194 98% 58%) var(--ring-progress),
+      hsl(218 23% 26%) 0
+    );
+}
+
+.dark .countdown-ring--danger {
+  background:
+    conic-gradient(
+      hsl(1 83% 70%) var(--ring-progress),
+      hsl(218 23% 26%) 0
+    );
 }

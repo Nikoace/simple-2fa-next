@@ -1,0 +1,29 @@
+{
+  "vault": {
+    "setup_title": "マスターパスワードを設定",
+    "setup_subtitle": "アカウントを保護するためのマスターパスワードを作成してください",
+    "setup_submit": "Vault を作成",
+    "unlock_title": "Vault を解錠",
+    "unlock_subtitle": "マスターパスワードを入力してアカウントにアクセス",
+    "unlock_submit": "解錠",
+    "password_placeholder": "マスターパスワード",
+    "wrong_password": "パスワードが違います"
+  },
+  "accounts": {
+    "empty_title": "アカウントがありません",
+    "empty_hint": "最初の TOTP アカウントを追加してください",
+    "copied": "コピーしました"
+  },
+  "nav": {
+    "lock": "ロック"
+  },
+  "theme": {
+    "light": "ライト",
+    "dark": "ダーク",
+    "system": "システム"
+  },
+  "common": {
+    "loading": "読み込み中…",
+    "error": "エラーが発生しました"
+  }
+}

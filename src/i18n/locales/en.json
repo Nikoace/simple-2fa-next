@@ -1,0 +1,29 @@
+{
+  "vault": {
+    "setup_title": "Set Master Password",
+    "setup_subtitle": "Create a master password to protect your accounts",
+    "setup_submit": "Create Vault",
+    "unlock_title": "Unlock Vault",
+    "unlock_subtitle": "Enter your master password to access your accounts",
+    "unlock_submit": "Unlock",
+    "password_placeholder": "Master password",
+    "wrong_password": "Wrong password, please try again"
+  },
+  "accounts": {
+    "empty_title": "No accounts yet",
+    "empty_hint": "Add your first TOTP account",
+    "copied": "Copied"
+  },
+  "nav": {
+    "lock": "Lock"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "common": {
+    "loading": "Loading…",
+    "error": "Something went wrong"
+  }
+}

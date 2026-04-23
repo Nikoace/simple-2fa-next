@@ -1,13 +1,22 @@
+import { MoreVertical } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Card } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useNow } from "@/hooks/useNow";
 import type { AccountWithCode } from "@/lib/tauri";
 import { cn } from "@/lib/utils";
 
 import { CodeDisplay } from "./CodeDisplay";
 import { CountdownRing } from "./CountdownRing";
+import { DeleteAccountAlert } from "./DeleteAccountAlert";
+import { EditAccountDialog } from "./EditAccountDialog";
 
 type Props = {
   account: AccountWithCode;
@@ -18,6 +27,8 @@ export function AccountCard({ account, className }: Props) {
   const { t } = useTranslation();
   const now = useNow();
   const [copied, setCopied] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const ttl = account.period - (now % account.period);
   const progress = ttl / account.period;
@@ -31,7 +42,10 @@ export function AccountCard({ account, className }: Props) {
 
   return (
     <Card
-      className={cn("flex items-center gap-4 p-4 transition-colors hover:bg-muted/50", className)}
+      className={cn(
+        "relative flex items-center gap-4 p-4 transition-colors hover:bg-muted/50",
+        className,
+      )}
     >
       <CountdownRing period={account.period} progress={progress} danger={isDanger} />
 
@@ -53,6 +67,34 @@ export function AccountCard({ account, className }: Props) {
           {copied ? t("accounts.copied") : `${ttl}s`}
         </p>
       </button>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger>
+          <span className="rounded p-1 text-muted-foreground hover:bg-muted">
+            <MoreVertical className="size-4" />
+            <span className="pl-1 text-xs">options</span>
+          </span>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="right-0">
+          <DropdownMenuItem onClick={() => setEditOpen(true)}>
+            {t("accounts.edit")}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setDeleteOpen(true)}>
+            {t("accounts.delete")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {editOpen ? (
+        <EditAccountDialog open={editOpen} account={account} onClose={() => setEditOpen(false)} />
+      ) : null}
+      {deleteOpen ? (
+        <DeleteAccountAlert
+          open={deleteOpen}
+          account={account}
+          onClose={() => setDeleteOpen(false)}
+        />
+      ) : null}
     </Card>
   );
 }

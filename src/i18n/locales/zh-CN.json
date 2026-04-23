@@ -12,7 +12,27 @@
   "accounts": {
     "empty_title": "还没有账户",
     "empty_hint": "添加您的第一个 TOTP 账户",
-    "copied": "已复制"
+    "copied": "已复制",
+    "add": "添加账户",
+    "edit": "编辑",
+    "delete": "删除",
+    "delete_confirm_title": "确认删除",
+    "delete_confirm_desc": "删除后无法恢复，确定要删除「{{name}}」吗？",
+    "name_label": "账户名称",
+    "name_placeholder": "例如：alice@example.com",
+    "issuer_label": "服务提供商",
+    "issuer_placeholder": "例如：GitHub",
+    "secret_label": "密钥（Base32）",
+    "secret_placeholder": "JBSWY3DPEHPK3PXP",
+    "algorithm_label": "算法",
+    "digits_label": "位数",
+    "period_label": "刷新周期（秒）",
+    "name_required": "账户名称不能为空",
+    "secret_required": "密钥不能为空",
+    "secret_invalid": "密钥必须是有效的 Base32 字符串",
+    "save": "保存",
+    "cancel": "取消",
+    "drag_hint": "拖拽调整顺序"
   },
   "nav": {
     "lock": "锁定"

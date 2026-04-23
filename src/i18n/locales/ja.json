@@ -12,7 +12,27 @@
   "accounts": {
     "empty_title": "アカウントがありません",
     "empty_hint": "最初の TOTP アカウントを追加してください",
-    "copied": "コピーしました"
+    "copied": "コピーしました",
+    "add": "アカウントを追加",
+    "edit": "編集",
+    "delete": "削除",
+    "delete_confirm_title": "削除の確認",
+    "delete_confirm_desc": "この操作は元に戻せません。「{{name}}」を削除しますか？",
+    "name_label": "アカウント名",
+    "name_placeholder": "例: alice@example.com",
+    "issuer_label": "サービス提供元",
+    "issuer_placeholder": "例: GitHub",
+    "secret_label": "シークレット (Base32)",
+    "secret_placeholder": "JBSWY3DPEHPK3PXP",
+    "algorithm_label": "アルゴリズム",
+    "digits_label": "桁数",
+    "period_label": "更新間隔 (秒)",
+    "name_required": "アカウント名は必須です",
+    "secret_required": "シークレットは必須です",
+    "secret_invalid": "シークレットは有効な Base32 である必要があります",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "drag_hint": "ドラッグして並び替え"
   },
   "nav": {
     "lock": "ロック"

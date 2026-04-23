@@ -3,13 +3,14 @@ import { render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("framer-motion", () => ({
-  motion: { div: "div", span: "span" },
-  AnimatePresence: ({ children }: { children: ReactNode }) => <>{children}</>,
-}));
+vi.mock("@/hooks/useNow", () => ({ useNow: () => 1704067215 }));
 
 vi.mock("@/lib/tauri", () => ({
   getAccounts: vi.fn(),
+  addAccount: vi.fn(),
+  updateAccount: vi.fn(),
+  deleteAccount: vi.fn(),
+  reorderAccounts: vi.fn(),
 }));
 
 import * as tauri from "@/lib/tauri";
@@ -32,6 +33,7 @@ describe("MainPage", () => {
     renderWithQuery(<MainPage />);
     await waitFor(() => {
       expect(screen.getByText(/no accounts yet|还没有账户|アカウントがありません/i)).toBeTruthy();
+      expect(screen.getByRole("button", { name: /add|添加|追加/i })).toBeTruthy();
     });
   });
 
@@ -59,6 +61,7 @@ describe("MainPage", () => {
     await waitFor(() => {
       expect(screen.getAllByText("GitHub").length).toBeGreaterThan(0);
       expect(screen.getByText("123 456")).toBeTruthy();
+      expect(screen.getByRole("button", { name: /add|添加|追加/i })).toBeTruthy();
     });
   });
 });

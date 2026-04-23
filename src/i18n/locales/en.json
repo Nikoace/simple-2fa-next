@@ -12,7 +12,27 @@
   "accounts": {
     "empty_title": "No accounts yet",
     "empty_hint": "Add your first TOTP account",
-    "copied": "Copied"
+    "copied": "Copied",
+    "add": "Add Account",
+    "edit": "Edit",
+    "delete": "Delete",
+    "delete_confirm_title": "Confirm Delete",
+    "delete_confirm_desc": "This action cannot be undone. Delete '{{name}}'?",
+    "name_label": "Account Name",
+    "name_placeholder": "e.g. alice@example.com",
+    "issuer_label": "Issuer",
+    "issuer_placeholder": "e.g. GitHub",
+    "secret_label": "Secret (Base32)",
+    "secret_placeholder": "JBSWY3DPEHPK3PXP",
+    "algorithm_label": "Algorithm",
+    "digits_label": "Digits",
+    "period_label": "Period (seconds)",
+    "name_required": "Account name is required",
+    "secret_required": "Secret is required",
+    "secret_invalid": "Secret must be a valid Base32 string",
+    "save": "Save",
+    "cancel": "Cancel",
+    "drag_hint": "Drag to reorder"
   },
   "nav": {
     "lock": "Lock"

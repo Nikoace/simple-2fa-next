@@ -3,6 +3,15 @@ import { userEvent } from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/lib/tauri", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/tauri")>("@/lib/tauri");
+  return {
+    ...actual,
+    updateAccount: vi.fn(),
+    deleteAccount: vi.fn(),
+  };
+});
+
 vi.mock("framer-motion", () => ({
   motion: { span: "span" },
   AnimatePresence: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -67,5 +76,13 @@ describe("AccountCard", () => {
     vi.mocked(useNow).mockReturnValue(1704067225);
     const { container } = render(<AccountCard account={account} />);
     expect(container.querySelector(".countdown-ring--danger")).toBeTruthy();
+  });
+
+  it("shows edit and delete options in dropdown menu", async () => {
+    const user = userEvent.setup();
+    render(<AccountCard account={account} />);
+    await user.click(screen.getByRole("button", { name: /options/i }));
+    expect(screen.getByText(/edit|编辑/i)).toBeTruthy();
+    expect(screen.getByText(/delete|删除/i)).toBeTruthy();
   });
 });

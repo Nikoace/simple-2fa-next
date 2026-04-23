@@ -1,9 +1,10 @@
 mod commands;
-mod crypto;
+pub mod crypto;
 mod db;
 mod error;
+pub mod importer;
 mod state;
-mod totp;
+pub mod totp;
 
 use db::migrate::run_migrations;
 use std::path::PathBuf;

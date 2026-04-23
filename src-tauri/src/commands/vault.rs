@@ -15,22 +15,25 @@ const VERIFIER_PLAINTEXT: &[u8] = b"S2FA_NEXT_VAULT_OK";
 /// Called once on first launch to initialize the vault with a master password.
 #[tauri::command]
 pub fn setup_vault(password: String, state: State<'_, AppState>) -> Result<(), AppError> {
-    let db = state.db.lock().expect("db lock poisoned");
+    let key = {
+        let db = state.db.lock().expect("db lock poisoned");
 
-    if get_meta(&db, META_SALT)?.is_some() {
-        return Err(AppError::InvalidInput("vault already initialized".into()));
-    }
+        if get_meta(&db, META_SALT)?.is_some() {
+            return Err(AppError::InvalidInput("vault already initialized".into()));
+        }
 
-    let mut salt = [0u8; 16];
-    OsRng.fill_bytes(&mut salt);
-    let salt_hex = hex::encode(salt);
+        let mut salt = [0u8; 16];
+        OsRng.fill_bytes(&mut salt);
+        let salt_hex = hex::encode(salt);
 
-    let key = derive_key(&password, &salt)?;
-    let verifier_ct = seal(&key, VERIFIER_PLAINTEXT)?;
-    let verifier_hex = hex::encode(verifier_ct);
+        let key = derive_key(&password, &salt)?;
+        let verifier_ct = seal(&key, VERIFIER_PLAINTEXT)?;
+        let verifier_hex = hex::encode(verifier_ct);
 
-    set_meta(&db, META_SALT, &salt_hex)?;
-    set_meta(&db, META_VERIFIER, &verifier_hex)?;
+        set_meta(&db, META_SALT, &salt_hex)?;
+        set_meta(&db, META_VERIFIER, &verifier_hex)?;
+        key
+    }; // db lock released before vault lock is acquired
 
     *state.vault.lock().expect("vault lock poisoned") = Some(VaultState {
         key: Secret::new(key),
@@ -41,19 +44,22 @@ pub fn setup_vault(password: String, state: State<'_, AppState>) -> Result<(), A
 /// Unlocks the vault by verifying the master password against the stored verifier.
 #[tauri::command]
 pub fn unlock_vault(password: String, state: State<'_, AppState>) -> Result<(), AppError> {
-    let db = state.db.lock().expect("db lock poisoned");
+    let key = {
+        let db = state.db.lock().expect("db lock poisoned");
 
-    let salt_hex = get_meta(&db, META_SALT)?
-        .ok_or_else(|| AppError::InvalidInput("vault not initialized".into()))?;
-    let salt = hex::decode(&salt_hex).map_err(|_| AppError::Crypto("corrupt salt".into()))?;
+        let salt_hex = get_meta(&db, META_SALT)?
+            .ok_or_else(|| AppError::InvalidInput("vault not initialized".into()))?;
+        let salt = hex::decode(&salt_hex).map_err(|_| AppError::Crypto("corrupt salt".into()))?;
 
-    let verifier_hex = get_meta(&db, META_VERIFIER)?
-        .ok_or_else(|| AppError::InvalidInput("verifier missing".into()))?;
-    let verifier_ct =
-        hex::decode(&verifier_hex).map_err(|_| AppError::Crypto("corrupt verifier".into()))?;
+        let verifier_hex = get_meta(&db, META_VERIFIER)?
+            .ok_or_else(|| AppError::InvalidInput("verifier missing".into()))?;
+        let verifier_ct =
+            hex::decode(&verifier_hex).map_err(|_| AppError::Crypto("corrupt verifier".into()))?;
 
-    let key = derive_key(&password, &salt)?;
-    open(&key, &verifier_ct).map_err(|_| AppError::InvalidInput("wrong password".into()))?;
+        let key = derive_key(&password, &salt)?;
+        open(&key, &verifier_ct).map_err(|_| AppError::InvalidInput("wrong password".into()))?;
+        key
+    }; // db lock released before vault lock is acquired
 
     *state.vault.lock().expect("vault lock poisoned") = Some(VaultState {
         key: Secret::new(key),

@@ -58,9 +58,10 @@ pub fn get_accounts(state: State<'_, AppState>) -> Result<Vec<AccountWithCode>, 
     repo.list_with_cipher()?
         .into_iter()
         .map(|(acc, cipher)| {
-            let secret_bytes = open(vault_key, &cipher)?;
+            let mut secret_bytes = open(vault_key, &cipher)?;
             let period = acc.period;
             let code = generate(&secret_bytes, acc.algorithm.as_str(), acc.digits, period, 0);
+            secret_bytes.zeroize();
             let ttl = period - (now % period as u64) as u32;
             let progress = ttl as f32 / period as f32;
             Ok(AccountWithCode {
@@ -127,8 +128,10 @@ pub fn update_account(
     let repo = AccountRepo(&db);
     let acc = repo.update(id, input)?;
     let cipher = repo.get_secret_cipher(acc.id)?;
-    let secret_bytes = open(vault_key, &cipher)?;
-    get_account_with_code(&acc, &secret_bytes)
+    let mut secret_bytes = open(vault_key, &cipher)?;
+    let result = get_account_with_code(&acc, &secret_bytes);
+    secret_bytes.zeroize();
+    result
 }
 
 #[tauri::command]

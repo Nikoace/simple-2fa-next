@@ -47,6 +47,19 @@ jobs:
         working-directory: src-tauri
         run: cargo test --all-features
 
+      - name: Install security tools
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-deny,cargo-audit
+
+      - name: cargo-deny (dependency policy)
+        working-directory: src-tauri
+        run: cargo deny check
+
+      - name: cargo-audit (known vulnerabilities)
+        working-directory: src-tauri
+        run: cargo audit
+
   frontend:
     name: Frontend
     runs-on: ubuntu-latest

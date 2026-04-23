@@ -3,7 +3,9 @@ use argon2::{Argon2, Params, Version};
 use crate::error::AppError;
 
 /// Derives a 256-bit vault key from a master password using Argon2id.
-/// Parameters are intentionally fixed to be compatible with legacy .s2fa v1 backup format.
+/// These parameters happen to match the v1 .s2fa export format; see
+/// `crypto::legacy_s2fa::derive_v1_key` for the frozen v1 path — do not
+/// keep these two in sync. Vault KDF parameters may be strengthened independently.
 pub fn derive_key(password: &str, salt: &[u8]) -> Result<[u8; 32], AppError> {
     let params = Params::new(65_536, 3, 4, Some(32))
         .map_err(|_| AppError::Crypto("kdf params".into()))?;

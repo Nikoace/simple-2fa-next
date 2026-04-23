@@ -1,0 +1,46 @@
+[advisories]
+ignore = [
+  "RUSTSEC-2024-0370", # proc-macro-error (transitive via gtk3 stack)
+  "RUSTSEC-2024-0411", # gdkwayland-sys (gtk3 unmaintained)
+  "RUSTSEC-2024-0412", # gdk (gtk3 unmaintained)
+  "RUSTSEC-2024-0413", # atk (gtk3 unmaintained)
+  "RUSTSEC-2024-0414", # gdkx11-sys (gtk3 unmaintained)
+  "RUSTSEC-2024-0415", # gtk (gtk3 unmaintained)
+  "RUSTSEC-2024-0416", # atk-sys (gtk3 unmaintained)
+  "RUSTSEC-2024-0417", # gdkx11 (gtk3 unmaintained)
+  "RUSTSEC-2024-0418", # gdk-sys (gtk3 unmaintained)
+  "RUSTSEC-2024-0419", # gtk3-macros (gtk3 unmaintained)
+  "RUSTSEC-2024-0420", # gtk-sys (gtk3 unmaintained)
+  "RUSTSEC-2025-0057", # fxhash unmaintained (transitive)
+  "RUSTSEC-2025-0075", # unic-char-range unmaintained (transitive)
+  "RUSTSEC-2025-0080", # unic-common unmaintained (transitive)
+  "RUSTSEC-2025-0081", # unic-char-property unmaintained (transitive)
+  "RUSTSEC-2025-0098", # unic-ucd-version unmaintained (transitive)
+  "RUSTSEC-2025-0100", # unic-ucd-ident unmaintained (transitive)
+]
+
+[licenses]
+allow = [
+  "MIT",
+  "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
+  "MPL-2.0",
+  "Unicode-3.0",
+  "ISC",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "CC0-1.0",
+  "CDLA-Permissive-2.0",
+  "Zlib",
+]
+exceptions = []
+
+[licenses.private]
+ignore = true
+
+[bans]
+multiple-versions = "warn"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"

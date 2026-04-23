@@ -2,6 +2,7 @@
 name = "simple-2fa-next"
 version = "0.1.0"
 description = "Simple 2FA Next — Modern TOTP Authenticator"
+license = "MIT"
 authors = []
 edition = "2021"
 
@@ -40,11 +41,13 @@ secrecy = { version = "0.8", features = ["serde"] }
 # Error handling
 thiserror = "2"
 
-# Async
-tokio = { version = "1", features = ["full"] }
 
 [dev-dependencies]
 proptest = "1"
+
+[[test]]
+name = "legacy_decrypt"
+path = "tests/legacy_decrypt.rs"
 
 [profile.release]
 panic = "abort"

@@ -1,5 +1,5 @@
 import { MoreVertical } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Card } from "@/components/ui/card";
@@ -29,6 +29,13 @@ export function AccountCard({ account, className }: Props) {
   const [copied, setCopied] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copiedTimerRef.current !== null) clearTimeout(copiedTimerRef.current);
+    };
+  }, []);
 
   const ttl = account.period - (now % account.period);
   const progress = ttl / account.period;
@@ -36,8 +43,9 @@ export function AccountCard({ account, className }: Props) {
 
   async function handleCopy() {
     await navigator.clipboard.writeText(account.code);
+    if (copiedTimerRef.current !== null) clearTimeout(copiedTimerRef.current);
     setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    copiedTimerRef.current = setTimeout(() => setCopied(false), 1500);
   }
 
   return (

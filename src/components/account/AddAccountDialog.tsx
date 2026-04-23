@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -57,6 +58,7 @@ export function AddAccountDialog({ open, onClose }: Props) {
   });
 
   const { isSubmitting, isValid } = form.formState;
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   function messageFor(errorMessage: unknown) {
     if (typeof errorMessage !== "string") {
@@ -66,14 +68,19 @@ export function AddAccountDialog({ open, onClose }: Props) {
   }
 
   async function onSubmit(values: FormOutput) {
-    await addAccount({
-      ...values,
-      issuer: values.issuer?.trim() || undefined,
-      secret: values.secret.replace(/\s/g, "").toUpperCase(),
-    });
-    await qc.invalidateQueries({ queryKey: ["accounts"] });
-    form.reset();
-    onClose();
+    setSubmitError(null);
+    try {
+      await addAccount({
+        ...values,
+        issuer: values.issuer?.trim() || undefined,
+        secret: values.secret.replace(/\s/g, "").toUpperCase(),
+      });
+      await qc.invalidateQueries({ queryKey: ["accounts"] });
+      form.reset();
+      onClose();
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : t("common.error"));
+    }
   }
 
   return (
@@ -85,8 +92,9 @@ export function AddAccountDialog({ open, onClose }: Props) {
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label>{t("accounts.name_label")}</Label>
+            <Label htmlFor="add-name">{t("accounts.name_label")}</Label>
             <Input
+              id="add-name"
               aria-label={t("accounts.name_label")}
               placeholder={t("accounts.name_placeholder")}
               {...form.register("name")}
@@ -99,8 +107,9 @@ export function AddAccountDialog({ open, onClose }: Props) {
           </div>
 
           <div className="space-y-2">
-            <Label>{t("accounts.issuer_label")}</Label>
+            <Label htmlFor="add-issuer">{t("accounts.issuer_label")}</Label>
             <Input
+              id="add-issuer"
               aria-label={t("accounts.issuer_label")}
               placeholder={t("accounts.issuer_placeholder")}
               {...form.register("issuer")}
@@ -108,11 +117,15 @@ export function AddAccountDialog({ open, onClose }: Props) {
           </div>
 
           <div className="space-y-2">
-            <Label>{t("accounts.secret_label")}</Label>
+            <Label htmlFor="add-secret">{t("accounts.secret_label")}</Label>
             <Input
+              id="add-secret"
               aria-label={t("accounts.secret_label")}
               placeholder={t("accounts.secret_placeholder")}
               autoComplete="off"
+              spellCheck={false}
+              autoCorrect="off"
+              autoCapitalize="characters"
               {...form.register("secret")}
             />
             {form.formState.errors.secret?.message && (
@@ -124,13 +137,13 @@ export function AddAccountDialog({ open, onClose }: Props) {
 
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-2">
-              <Label>{t("accounts.algorithm_label")}</Label>
+              <Label htmlFor="add-algorithm">{t("accounts.algorithm_label")}</Label>
               <Controller
                 control={form.control}
                 name="algorithm"
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger aria-label={t("accounts.algorithm_label")}>
+                    <SelectTrigger id="add-algorithm" aria-label={t("accounts.algorithm_label")}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -144,7 +157,7 @@ export function AddAccountDialog({ open, onClose }: Props) {
             </div>
 
             <div className="space-y-2">
-              <Label>{t("accounts.digits_label")}</Label>
+              <Label htmlFor="add-digits">{t("accounts.digits_label")}</Label>
               <Controller
                 control={form.control}
                 name="digits"
@@ -153,7 +166,7 @@ export function AddAccountDialog({ open, onClose }: Props) {
                     value={String(field.value)}
                     onValueChange={(v) => field.onChange(Number(v))}
                   >
-                    <SelectTrigger aria-label={t("accounts.digits_label")}>
+                    <SelectTrigger id="add-digits" aria-label={t("accounts.digits_label")}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -167,8 +180,9 @@ export function AddAccountDialog({ open, onClose }: Props) {
             </div>
 
             <div className="space-y-2">
-              <Label>{t("accounts.period_label")}</Label>
+              <Label htmlFor="add-period">{t("accounts.period_label")}</Label>
               <Input
+                id="add-period"
                 aria-label={t("accounts.period_label")}
                 type="number"
                 {...form.register("period", { valueAsNumber: true })}
@@ -176,6 +190,7 @@ export function AddAccountDialog({ open, onClose }: Props) {
             </div>
           </div>
 
+          {submitError && <p className="text-sm text-destructive">{submitError}</p>}
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="ghost" onClick={onClose}>
               {t("accounts.cancel")}

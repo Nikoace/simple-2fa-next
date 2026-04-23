@@ -3,7 +3,9 @@ import {
   type HTMLAttributes,
   type ReactNode,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -27,7 +29,26 @@ function useDropdownCtx() {
 export function DropdownMenu({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const value = useMemo(() => ({ open, setOpen }), [open]);
-  return <DropdownCtx.Provider value={value}>{children}</DropdownCtx.Provider>;
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleOutsideClick(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [open]);
+
+  return (
+    <DropdownCtx.Provider value={value}>
+      <div ref={containerRef} className="relative">
+        {children}
+      </div>
+    </DropdownCtx.Provider>
+  );
 }
 
 export function DropdownMenuTrigger({

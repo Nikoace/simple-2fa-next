@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -28,6 +28,7 @@ type Props = {
 export function EditAccountDialog({ open, account, onClose }: Props) {
   const { t } = useTranslation();
   const qc = useQueryClient();
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -38,9 +39,10 @@ export function EditAccountDialog({ open, account, onClose }: Props) {
     },
   });
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: form.reset is stable across renders
   useEffect(() => {
     form.reset({ name: account.name, issuer: account.issuer ?? "" });
-  }, [account, form]);
+  }, [account]);
 
   function messageFor(errorMessage: unknown) {
     if (typeof errorMessage !== "string") {
@@ -50,12 +52,17 @@ export function EditAccountDialog({ open, account, onClose }: Props) {
   }
 
   async function onSubmit(values: FormValues) {
-    await updateAccount(account.id, {
-      name: values.name,
-      issuer: values.issuer?.trim() || undefined,
-    });
-    await qc.invalidateQueries({ queryKey: ["accounts"] });
-    onClose();
+    setSubmitError(null);
+    try {
+      await updateAccount(account.id, {
+        name: values.name,
+        issuer: values.issuer?.trim() || undefined,
+      });
+      await qc.invalidateQueries({ queryKey: ["accounts"] });
+      onClose();
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : t("common.error"));
+    }
   }
 
   return (
@@ -67,8 +74,9 @@ export function EditAccountDialog({ open, account, onClose }: Props) {
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label>{t("accounts.name_label")}</Label>
+            <Label htmlFor="edit-name">{t("accounts.name_label")}</Label>
             <Input
+              id="edit-name"
               aria-label={t("accounts.name_label")}
               placeholder={t("accounts.name_placeholder")}
               {...form.register("name")}
@@ -81,14 +89,16 @@ export function EditAccountDialog({ open, account, onClose }: Props) {
           </div>
 
           <div className="space-y-2">
-            <Label>{t("accounts.issuer_label")}</Label>
+            <Label htmlFor="edit-issuer">{t("accounts.issuer_label")}</Label>
             <Input
+              id="edit-issuer"
               aria-label={t("accounts.issuer_label")}
               placeholder={t("accounts.issuer_placeholder")}
               {...form.register("issuer")}
             />
           </div>
 
+          {submitError && <p className="text-sm text-destructive">{submitError}</p>}
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="ghost" onClick={onClose}>
               {t("accounts.cancel")}

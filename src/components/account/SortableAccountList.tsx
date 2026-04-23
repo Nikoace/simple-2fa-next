@@ -2,6 +2,7 @@ import {
   closestCenter,
   DndContext,
   type DragEndEvent,
+  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
@@ -9,18 +10,21 @@ import {
 import {
   arrayMove,
   SortableContext,
+  sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useQueryClient } from "@tanstack/react-query";
 import { GripVertical } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { type AccountWithCode, reorderAccounts } from "@/lib/tauri";
 
 import { AccountCard } from "./AccountCard";
 
 function SortableItem({ account }: { account: AccountWithCode }) {
+  const { t } = useTranslation();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: account.id,
   });
@@ -34,7 +38,7 @@ function SortableItem({ account }: { account: AccountWithCode }) {
     >
       <button
         type="button"
-        aria-label="drag to reorder"
+        aria-label={t("accounts.drag_hint")}
         className="cursor-grab touch-none p-1 text-muted-foreground/50 hover:text-muted-foreground active:cursor-grabbing"
         {...listeners}
       >
@@ -51,7 +55,10 @@ type Props = { accounts: AccountWithCode[] };
 
 export function SortableAccountList({ accounts }: Props) {
   const qc = useQueryClient();
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -72,7 +79,9 @@ export function SortableAccountList({ accounts }: Props) {
     try {
       await reorderAccounts(reordered.map((account) => account.id));
     } catch {
-      qc.setQueryData<AccountWithCode[]>(["accounts"], previous);
+      if (previous !== undefined) {
+        qc.setQueryData<AccountWithCode[]>(["accounts"], previous);
+      }
     }
   }
 

@@ -11,24 +11,29 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { useSettingsStore } from "@/stores/settings";
+import { applyTheme, useSettingsStore } from "@/stores/settings";
 import { useVaultStore } from "@/stores/vault";
 
-function useApplyTheme(theme: "light" | "dark" | "system") {
-  useEffect(() => {
-    const root = document.documentElement;
-    const darkPreferred = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const isDark = theme === "dark" || (theme === "system" && darkPreferred);
-    root.classList.toggle("dark", isDark);
-  }, [theme]);
-}
+const LANG_LABELS: Record<string, string> = {
+  "zh-CN": "中文",
+  en: "EN",
+  ja: "日本語",
+};
 
 export function AppShell() {
   const { t, i18n } = useTranslation();
   const { theme, setTheme } = useSettingsStore();
   const lock = useVaultStore((state) => state.lock);
+  const vaultStatus = useVaultStore((s) => s.status);
 
-  useApplyTheme(theme);
+  useEffect(() => {
+    applyTheme(theme);
+    if (theme !== "system") return;
+    const mq = globalThis.matchMedia("(prefers-color-scheme: dark)");
+    const handler = () => applyTheme("system");
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, [theme]);
 
   return (
     <div className="relative min-h-screen bg-background text-foreground">
@@ -60,7 +65,7 @@ export function AppShell() {
           <DropdownMenu>
             <DropdownMenuTrigger>
               <span className="inline-flex items-center rounded-md px-3 py-1.5 text-sm hover:bg-muted">
-                {i18n.language}
+                {LANG_LABELS[i18n.language] ?? i18n.language}
               </span>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -76,14 +81,16 @@ export function AppShell() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn("text-muted-foreground hover:text-foreground")}
-            onClick={() => void lock()}
-          >
-            {t("nav.lock")}
-          </Button>
+          {vaultStatus === "unlocked" && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn("text-muted-foreground hover:text-foreground")}
+              onClick={() => void lock()}
+            >
+              {t("nav.lock")}
+            </Button>
+          )}
         </div>
       </header>
 

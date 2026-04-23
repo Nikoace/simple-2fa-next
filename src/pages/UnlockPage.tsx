@@ -1,33 +1,28 @@
 import { useNavigate } from "@tanstack/react-router";
-import type { FormEvent } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { unlockVault } from "@/lib/tauri";
+import { useVaultStore } from "@/stores/vault";
 
 export function UnlockPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-
+  const { unlock, status, error } = useVaultStore();
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [wrong, setWrong] = useState(false);
 
-  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    if (status === "unlocked") void navigate({ to: "/" });
+  }, [status, navigate]);
+
+  async function onSubmit(e: { preventDefault(): void }) {
     e.preventDefault();
-    setWrong(false);
     setLoading(true);
-    try {
-      await unlockVault(password);
-      await navigate({ to: "/" });
-    } catch {
-      setWrong(true);
-    } finally {
-      setLoading(false);
-    }
+    await unlock(password);
+    setLoading(false);
   }
 
   return (
@@ -43,7 +38,7 @@ export function UnlockPage() {
           placeholder={t("vault.password_placeholder")}
           autoFocus
         />
-        {wrong && <p className="text-sm text-destructive">{t("vault.wrong_password")}</p>}
+        {error && <p className="text-sm text-destructive">{error}</p>}
         <Button type="submit" className="w-full" disabled={loading || password.length === 0}>
           {loading ? t("common.loading") : t("vault.unlock_submit")}
         </Button>

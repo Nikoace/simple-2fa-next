@@ -1,33 +1,28 @@
 import { useNavigate } from "@tanstack/react-router";
-import type { FormEvent } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { setupVault, unlockVault } from "@/lib/tauri";
+import { useVaultStore } from "@/stores/vault";
 
 export function SetupPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { setup, status, error } = useVaultStore();
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    if (status === "unlocked") void navigate({ to: "/" });
+  }, [status, navigate]);
+
+  async function onSubmit(e: { preventDefault(): void }) {
     e.preventDefault();
-    setError(null);
     setLoading(true);
-    try {
-      await setupVault(password);
-      await unlockVault(password);
-      await navigate({ to: "/" });
-    } catch {
-      setError(t("common.error"));
-    } finally {
-      setLoading(false);
-    }
+    await setup(password);
+    setLoading(false);
   }
 
   return (

@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const navigateMock = vi.fn().mockResolvedValue(undefined);
 
@@ -13,19 +13,27 @@ vi.mock("@tanstack/react-router", async () => {
   };
 });
 
-vi.mock("@/lib/tauri", () => ({
-  setupVault: vi.fn(),
-  unlockVault: vi.fn(),
+const setupMock = vi.fn();
+
+vi.mock("@/stores/vault", () => ({
+  useVaultStore: vi.fn(),
 }));
 
-import * as tauri from "@/lib/tauri";
+import * as vaultMod from "@/stores/vault";
 import { SetupPage } from "./SetupPage";
 
-describe("SetupPage", () => {
-  it("submits password and navigates to /", async () => {
-    vi.mocked(tauri.setupVault).mockResolvedValue();
-    vi.mocked(tauri.unlockVault).mockResolvedValue();
+beforeEach(() => {
+  navigateMock.mockClear();
+  setupMock.mockResolvedValue(undefined);
+  vi.mocked(vaultMod.useVaultStore).mockReturnValue({
+    setup: setupMock,
+    status: "uninitialized",
+    error: null,
+  } as ReturnType<typeof vaultMod.useVaultStore>);
+});
 
+describe("SetupPage", () => {
+  it("calls setup with the entered password", async () => {
     render(<SetupPage />);
 
     const user = userEvent.setup();
@@ -35,8 +43,18 @@ describe("SetupPage", () => {
     );
     await user.click(screen.getByRole("button", { name: /create vault|创建 vault|vault を作成/i }));
 
-    await waitFor(() => expect(tauri.setupVault).toHaveBeenCalledWith("password123"));
-    await waitFor(() => expect(tauri.unlockVault).toHaveBeenCalledWith("password123"));
+    await waitFor(() => expect(setupMock).toHaveBeenCalledWith("password123"));
+  });
+
+  it("navigates to / when vault status becomes unlocked", async () => {
+    vi.mocked(vaultMod.useVaultStore).mockReturnValue({
+      setup: setupMock,
+      status: "unlocked",
+      error: null,
+    } as ReturnType<typeof vaultMod.useVaultStore>);
+
+    render(<SetupPage />);
+
     await waitFor(() => expect(navigateMock).toHaveBeenCalledWith({ to: "/" }));
   });
 });

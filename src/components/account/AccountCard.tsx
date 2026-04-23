@@ -31,10 +31,7 @@ export function AccountCard({ account, className }: Props) {
 
   return (
     <Card
-      className={cn(
-        "flex cursor-pointer items-center gap-4 p-4 transition-colors hover:bg-muted/50",
-        className,
-      )}
+      className={cn("flex items-center gap-4 p-4 transition-colors hover:bg-muted/50", className)}
     >
       <CountdownRing period={account.period} progress={progress} danger={isDanger} />
 

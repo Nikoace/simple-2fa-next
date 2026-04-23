@@ -9,9 +9,11 @@ describe("router", () => {
 
   it("has three top-level routes: / /unlock /setup", async () => {
     const { router } = await import("./router");
-    const paths = router.routeTree.children?.map((r: { path: string }) => r.path) ?? [];
+    const rawPaths = router.routeTree.children?.map((r: { path: string }) => r.path) ?? [];
+    // Normalize to leading-slash form regardless of how TanStack Router stores them internally.
+    const paths = rawPaths.map((p: string) => (p.startsWith("/") ? p : `/${p}`));
     expect(paths).toContain("/");
-    expect(paths).toContain("unlock");
-    expect(paths).toContain("setup");
+    expect(paths).toContain("/unlock");
+    expect(paths).toContain("/setup");
   });
 });

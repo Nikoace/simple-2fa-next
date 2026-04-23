@@ -30,6 +30,7 @@ describe("useNow", () => {
   });
 
   it("does not update within the same second", async () => {
+    // Starts at 0.5 s into a second; 400 ms later is still the same second (0.9 s), so no tick.
     vi.setSystemTime(new Date("2024-01-01T00:00:00.500Z"));
     const { result } = renderHook(() => useNow());
     const initial = result.current;

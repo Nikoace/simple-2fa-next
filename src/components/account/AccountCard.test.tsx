@@ -1,15 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import type { ReactNode } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("framer-motion", () => ({
   motion: { span: "span" },
   AnimatePresence: ({ children }: { children: ReactNode }) => <>{children}</>,
 }));
 
-vi.mock("@/hooks/useNow", () => ({ useNow: () => 1704067215 }));
+vi.mock("@/hooks/useNow", () => ({ useNow: vi.fn() }));
 
+import { useNow } from "@/hooks/useNow";
 import type { AccountWithCode } from "@/lib/tauri";
 import { AccountCard } from "./AccountCard";
 
@@ -28,6 +29,10 @@ const account: AccountWithCode = {
   ttl: 15,
   progress: 0.5,
 };
+
+beforeEach(() => {
+  vi.mocked(useNow).mockReturnValue(1704067215); // 1704067215 % 30 = 15, ttl = 15
+});
 
 describe("AccountCard", () => {
   it("shows account name", () => {
@@ -58,7 +63,9 @@ describe("AccountCard", () => {
   });
 
   it("renders danger state when ttl <= 5s", () => {
+    // 1704067225 % 30 = 25, ttl = 30 - 25 = 5, triggers danger
+    vi.mocked(useNow).mockReturnValue(1704067225);
     const { container } = render(<AccountCard account={account} />);
-    expect(container.querySelector(".countdown-ring")).toBeTruthy();
+    expect(container.querySelector(".countdown-ring--danger")).toBeTruthy();
   });
 });

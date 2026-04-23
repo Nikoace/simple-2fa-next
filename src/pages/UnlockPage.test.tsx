@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const navigateMock = vi.fn().mockResolvedValue(undefined);
 
@@ -13,17 +13,27 @@ vi.mock("@tanstack/react-router", async () => {
   };
 });
 
-vi.mock("@/lib/tauri", () => ({
-  unlockVault: vi.fn(),
+const unlockMock = vi.fn();
+
+vi.mock("@/stores/vault", () => ({
+  useVaultStore: vi.fn(),
 }));
 
-import * as tauri from "@/lib/tauri";
+import * as vaultMod from "@/stores/vault";
 import { UnlockPage } from "./UnlockPage";
 
-describe("UnlockPage", () => {
-  it("submits password and calls unlockVault", async () => {
-    vi.mocked(tauri.unlockVault).mockResolvedValue();
+beforeEach(() => {
+  navigateMock.mockClear();
+  unlockMock.mockResolvedValue(undefined);
+  vi.mocked(vaultMod.useVaultStore).mockReturnValue({
+    unlock: unlockMock,
+    status: "locked",
+    error: null,
+  } as ReturnType<typeof vaultMod.useVaultStore>);
+});
 
+describe("UnlockPage", () => {
+  it("calls unlock with the entered password", async () => {
     render(<UnlockPage />);
 
     const user = userEvent.setup();
@@ -33,24 +43,30 @@ describe("UnlockPage", () => {
     );
     await user.click(screen.getByRole("button", { name: /unlock|解锁|解錠/i }));
 
-    await waitFor(() => expect(tauri.unlockVault).toHaveBeenCalledWith("secret"));
-    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith({ to: "/" }));
+    await waitFor(() => expect(unlockMock).toHaveBeenCalledWith("secret"));
   });
 
-  it("shows wrong password error on failure", async () => {
-    vi.mocked(tauri.unlockVault).mockRejectedValue(new Error("wrong password"));
+  it("navigates to / when vault status becomes unlocked", async () => {
+    vi.mocked(vaultMod.useVaultStore).mockReturnValue({
+      unlock: unlockMock,
+      status: "unlocked",
+      error: null,
+    } as ReturnType<typeof vaultMod.useVaultStore>);
 
     render(<UnlockPage />);
 
-    const user = userEvent.setup();
-    await user.type(
-      screen.getByPlaceholderText(/master password|主密码|マスターパスワード/i),
-      "bad",
-    );
-    await user.click(screen.getByRole("button", { name: /unlock|解锁|解錠/i }));
+    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith({ to: "/" }));
+  });
 
-    await waitFor(() => {
-      expect(screen.getByText(/wrong password|密码错误|パスワードが違います/i)).toBeTruthy();
-    });
+  it("shows error from vault store", async () => {
+    vi.mocked(vaultMod.useVaultStore).mockReturnValue({
+      unlock: unlockMock,
+      status: "locked",
+      error: "wrong password",
+    } as ReturnType<typeof vaultMod.useVaultStore>);
+
+    render(<UnlockPage />);
+
+    expect(screen.getByText(/wrong password/i)).toBeTruthy();
   });
 });

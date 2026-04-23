@@ -35,7 +35,30 @@
     "drag_hint": "ドラッグして並び替え"
   },
   "nav": {
+    "import": "インポート",
+    "export": "エクスポート",
     "lock": "ロック"
+  },
+  "import": {
+    "title": "アカウントをインポート",
+    "description": ".s2fa バックアップファイルまたは otpauth URI からアカウントを取り込みます。",
+    "file_tab": "ファイル",
+    "uri_tab": "URI",
+    "choose_file": "ファイルを選択",
+    "uri_input": "otpauth URI",
+    "preview": "プレビュー",
+    "empty_preview": "プレビュー項目がありません",
+    "select_item": "選択",
+    "confirm": "インポートを確定"
+  },
+  "export": {
+    "title": "バックアップをエクスポート",
+    "description": "専用のエクスポート用パスワードで暗号化 .s2fa バックアップを作成します。",
+    "password": "エクスポート用パスワード",
+    "confirm_password": "確認用パスワード",
+    "password_mismatch": "パスワードが一致しません",
+    "submit": "エクスポート",
+    "success": "エクスポートが完了しました"
   },
   "theme": {
     "light": "ライト",

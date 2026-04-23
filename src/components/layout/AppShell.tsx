@@ -1,8 +1,10 @@
 import { Outlet } from "@tanstack/react-router";
 import { Moon, Sun } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { ExportDialog } from "@/components/import/ExportDialog";
+import { ImportDialog } from "@/components/import/ImportDialog";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -22,6 +24,8 @@ const LANG_LABELS: Record<string, string> = {
 
 export function AppShell() {
   const { t, i18n } = useTranslation();
+  const [importOpen, setImportOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
   const { theme, setTheme } = useSettingsStore();
   const lock = useVaultStore((state) => state.lock);
   const vaultStatus = useVaultStore((s) => s.status);
@@ -82,14 +86,32 @@ export function AppShell() {
           </DropdownMenu>
 
           {vaultStatus === "unlocked" && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className={cn("text-muted-foreground hover:text-foreground")}
-              onClick={() => void lock()}
-            >
-              {t("nav.lock")}
-            </Button>
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn("text-muted-foreground hover:text-foreground")}
+                onClick={() => setImportOpen(true)}
+              >
+                {t("nav.import")}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn("text-muted-foreground hover:text-foreground")}
+                onClick={() => setExportOpen(true)}
+              >
+                {t("nav.export")}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn("text-muted-foreground hover:text-foreground")}
+                onClick={() => void lock()}
+              >
+                {t("nav.lock")}
+              </Button>
+            </>
           )}
         </div>
       </header>
@@ -97,6 +119,8 @@ export function AppShell() {
       <main className="mx-auto w-full max-w-3xl px-4 pb-6 pt-2">
         <Outlet />
       </main>
+      <ImportDialog open={importOpen} onClose={() => setImportOpen(false)} />
+      <ExportDialog open={exportOpen} onClose={() => setExportOpen(false)} />
     </div>
   );
 }

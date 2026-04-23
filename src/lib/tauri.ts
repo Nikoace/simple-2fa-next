@@ -39,6 +39,20 @@ export type UpdateAccountInput = {
   notes?: string;
 };
 
+export type ImportAccountItem = {
+  name: string;
+  issuer?: string;
+  secret: string;
+  algorithm: string;
+  digits: number;
+  period: number;
+};
+
+export type ImportPreview = {
+  items: ImportAccountItem[];
+  sourceVersion: number;
+};
+
 export const isVaultInitialized = () => invoke<boolean>("is_vault_initialized");
 
 export const setupVault = (password: string) => invoke<void>("setup_vault", { password });
@@ -58,3 +72,15 @@ export const updateAccount = (id: number, input: UpdateAccountInput) =>
 export const deleteAccount = (id: number) => invoke<void>("delete_account", { id });
 
 export const reorderAccounts = (ids: number[]) => invoke<void>("reorder_accounts", { ids });
+
+export const importS2faFile = (path: string, password: string) =>
+  invoke<ImportPreview>("import_s2fa_file", { path, password });
+
+export const commitImport = (items: ImportAccountItem[]) =>
+  invoke<AccountWithCode[]>("commit_import", { items });
+
+export const parseOtpauthUri = (uri: string) =>
+  invoke<ImportAccountItem>("parse_otpauth_uri_cmd", { uri });
+
+export const exportVaultToFile = (path: string, password: string) =>
+  invoke<void>("export_vault_to_file", { path, password });

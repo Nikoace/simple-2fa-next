@@ -35,7 +35,30 @@
     "drag_hint": "拖拽调整顺序"
   },
   "nav": {
+    "import": "导入",
+    "export": "导出",
     "lock": "锁定"
+  },
+  "import": {
+    "title": "导入账户",
+    "description": "从 .s2fa 备份文件或 otpauth URI 导入账户。",
+    "file_tab": "文件",
+    "uri_tab": "URI",
+    "choose_file": "选择文件",
+    "uri_input": "otpauth URI",
+    "preview": "预览",
+    "empty_preview": "暂无预览项",
+    "select_item": "选择",
+    "confirm": "确认导入"
+  },
+  "export": {
+    "title": "导出备份",
+    "description": "使用独立导出密码创建加密的 .s2fa 备份。",
+    "password": "导出密码",
+    "confirm_password": "确认密码",
+    "password_mismatch": "两次密码不一致",
+    "submit": "导出",
+    "success": "导出成功"
   },
   "theme": {
     "light": "浅色",

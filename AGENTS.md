@@ -2,7 +2,7 @@
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **simple-2fa-next** (332 symbols, 672 relationships, 22 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **simple-2fa-next** (384 symbols, 802 relationships, 25 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -33,13 +33,6 @@ This project is indexed by GitNexus as **simple-2fa-next** (332 symbols, 672 rel
 - NEVER ignore HIGH or CRITICAL risk warnings from impact analysis.
 - NEVER rename symbols with find-and-replace — use `gitnexus_rename` which understands the call graph.
 - NEVER commit changes without running `gitnexus_detect_changes()` to check affected scope.
-
-## Frontend: Never Do
-
-- **NEVER** insert visible text (e.g. `<span>options</span>`) into a component just to make a `getByRole` / `getByText` test pass. Use `aria-label` on the element instead — and verify the component actually forwards HTML attributes (`...rest`) before relying on it.
-- **NEVER** use `queryClient.setQueryData` for an optimistic update without a `try/catch` that restores the previous value on failure. Leaving a stale optimistic state when the server call fails is a silent data-consistency bug.
-- **NEVER** spread dnd-kit `{...listeners}` onto an entire card or list item. Place them only on a dedicated drag-handle element so clicks on buttons and menus inside the card still work normally.
-- **NEVER** leave `DialogDescription` containing an unrelated i18n key (e.g. a field label or a hint string from another screen). Use a real descriptive string or omit `DialogDescription` entirely.
 
 ## Tools Quick Reference
 

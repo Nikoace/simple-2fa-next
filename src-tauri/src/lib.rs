@@ -41,6 +41,10 @@ pub fn run() {
             commands::accounts::update_account,
             commands::accounts::delete_account,
             commands::accounts::reorder_accounts,
+            commands::import::import_s2fa_file,
+            commands::import::commit_import,
+            commands::import::parse_otpauth_uri_cmd,
+            commands::import::export_vault_to_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

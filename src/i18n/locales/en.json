@@ -35,7 +35,30 @@
     "drag_hint": "Drag to reorder"
   },
   "nav": {
+    "import": "Import",
+    "export": "Export",
     "lock": "Lock"
+  },
+  "import": {
+    "title": "Import Accounts",
+    "description": "Import accounts from a .s2fa backup file or an otpauth URI.",
+    "file_tab": "File",
+    "uri_tab": "URI",
+    "choose_file": "Choose File",
+    "uri_input": "otpauth URI",
+    "preview": "Preview",
+    "empty_preview": "No preview items yet",
+    "select_item": "Select",
+    "confirm": "Confirm Import"
+  },
+  "export": {
+    "title": "Export Backup",
+    "description": "Create an encrypted .s2fa backup with a dedicated export password.",
+    "password": "Export Password",
+    "confirm_password": "Confirm Password",
+    "password_mismatch": "Passwords do not match",
+    "submit": "Export",
+    "success": "Export completed"
   },
   "theme": {
     "light": "Light",

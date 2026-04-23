@@ -50,10 +50,10 @@ fn wrong_password_fails() {
 #[test]
 fn import_s2fa_fixture_preview() {
     let preview = import_s2fa(FIXTURE, PASSWORD).expect("import must succeed");
-    assert_eq!(preview.format, "v1");
+    assert_eq!(preview.source_version, 1);
     assert_eq!(preview.items.len(), 3);
     for item in &preview.items {
-        assert!(!item.secret_bytes.is_empty());
+        assert!(!item.secret.is_empty());
         assert_eq!(item.algorithm, "SHA1");
         assert_eq!(item.digits, 6);
         assert_eq!(item.period, 30);

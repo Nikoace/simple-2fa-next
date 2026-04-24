@@ -340,6 +340,8 @@ mod tests {
     fn make_db() -> Connection {
         let mut conn = Connection::open_in_memory().expect("in-memory db must open");
         run_migrations(&mut conn).expect("migrations must succeed");
+        conn.execute_batch("PRAGMA foreign_keys = ON")
+            .expect("failed to enable foreign keys");
         conn
     }
 

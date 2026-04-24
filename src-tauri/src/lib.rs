@@ -26,6 +26,8 @@ pub fn run() {
 
             let mut conn =
                 rusqlite::Connection::open(&db_path).expect("failed to open database");
+            conn.execute_batch("PRAGMA foreign_keys = ON")
+                .expect("failed to enable foreign keys");
             run_migrations(&mut conn).expect("migration failed");
 
             app.manage(AppState::new(conn));
@@ -41,6 +43,10 @@ pub fn run() {
             commands::accounts::update_account,
             commands::accounts::delete_account,
             commands::accounts::reorder_accounts,
+            commands::groups::list_groups,
+            commands::groups::create_group,
+            commands::groups::rename_group,
+            commands::groups::delete_group,
             commands::import::import_s2fa_file,
             commands::import::commit_import,
             commands::import::parse_otpauth_uri_cmd,

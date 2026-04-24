@@ -34,6 +34,21 @@
     "cancel": "キャンセル",
     "drag_hint": "ドラッグして並び替え"
   },
+  "groups": {
+    "all": "すべて",
+    "add": "グループ追加",
+    "actions": "グループ操作",
+    "rename": "名前変更",
+    "delete": "削除",
+    "rename_prompt": "グループ名を変更",
+    "delete_confirm": "このグループを削除しますか？アカウントは未分類になります。",
+    "new_name_placeholder": "新しいグループ名",
+    "new_name_label": "グループ名",
+    "none": "未分類",
+    "select_label": "グループ",
+    "empty_in_filter": "このグループにアカウントはありません",
+    "delete_confirm_title": "グループを削除"
+  },
   "nav": {
     "import": "インポート",
     "export": "エクスポート",

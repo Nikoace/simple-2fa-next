@@ -34,6 +34,21 @@
     "cancel": "取消",
     "drag_hint": "拖拽调整顺序"
   },
+  "groups": {
+    "all": "全部",
+    "add": "添加分组",
+    "actions": "分组操作",
+    "rename": "重命名",
+    "delete": "删除",
+    "rename_prompt": "重命名分组",
+    "delete_confirm": "确定删除该分组吗？删除后账户会变为无分组。",
+    "new_name_placeholder": "新分组名称",
+    "new_name_label": "分组名称",
+    "none": "无分组",
+    "select_label": "分组",
+    "empty_in_filter": "该分组下暂无账户",
+    "delete_confirm_title": "删除分组"
+  },
   "nav": {
     "import": "导入",
     "export": "导出",

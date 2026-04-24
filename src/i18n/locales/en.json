@@ -34,6 +34,21 @@
     "cancel": "Cancel",
     "drag_hint": "Drag to reorder"
   },
+  "groups": {
+    "all": "All",
+    "add": "Add Group",
+    "actions": "Group actions",
+    "rename": "Rename",
+    "delete": "Delete",
+    "rename_prompt": "Rename group",
+    "delete_confirm": "Delete this group? Accounts will become ungrouped.",
+    "new_name_placeholder": "New group name",
+    "new_name_label": "Group name",
+    "none": "No group",
+    "select_label": "Group",
+    "empty_in_filter": "No accounts in this group",
+    "delete_confirm_title": "Delete Group"
+  },
   "nav": {
     "import": "Import",
     "export": "Export",

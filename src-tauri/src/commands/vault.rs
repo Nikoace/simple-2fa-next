@@ -37,6 +37,7 @@ pub fn setup_vault(password: String, state: State<'_, AppState>) -> Result<(), A
 
     *state.vault.lock().expect("vault lock poisoned") = Some(VaultState {
         key: Secret::new(key),
+        master_password: Secret::new(password),
     });
     Ok(())
 }
@@ -63,6 +64,7 @@ pub fn unlock_vault(password: String, state: State<'_, AppState>) -> Result<(), 
 
     *state.vault.lock().expect("vault lock poisoned") = Some(VaultState {
         key: Secret::new(key),
+        master_password: Secret::new(password),
     });
     Ok(())
 }
@@ -95,7 +97,7 @@ pub(crate) fn verify_password(state: &AppState, password: &str) -> Result<(), Ap
     Ok(())
 }
 
-fn get_meta(db: &rusqlite::Connection, key: &str) -> Result<Option<String>, AppError> {
+pub(crate) fn get_meta(db: &rusqlite::Connection, key: &str) -> Result<Option<String>, AppError> {
     match db.query_row(
         "SELECT value FROM meta WHERE key = ?1",
         rusqlite::params![key],
@@ -107,7 +109,7 @@ fn get_meta(db: &rusqlite::Connection, key: &str) -> Result<Option<String>, AppE
     }
 }
 
-fn set_meta(db: &rusqlite::Connection, key: &str, value: &str) -> Result<(), AppError> {
+pub(crate) fn set_meta(db: &rusqlite::Connection, key: &str, value: &str) -> Result<(), AppError> {
     db.execute(
         "INSERT INTO meta(key, value) VALUES(?1,?2)
          ON CONFLICT(key) DO UPDATE SET value = ?2",

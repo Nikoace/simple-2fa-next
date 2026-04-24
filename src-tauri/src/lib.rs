@@ -4,6 +4,7 @@ pub mod crypto;
 mod db;
 mod error;
 pub mod importer;
+pub mod sync;
 mod state;
 pub mod totp;
 
@@ -61,6 +62,10 @@ pub fn run() {
             commands::import::commit_import,
             commands::import::parse_otpauth_uri_cmd,
             commands::import::export_vault_to_file,
+            commands::sync::configure_sync,
+            commands::sync::sync_now,
+            commands::sync::get_sync_status,
+            commands::sync::disable_sync,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

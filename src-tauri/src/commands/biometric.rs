@@ -44,6 +44,7 @@ pub fn unlock_with_biometric(
     fixed.copy_from_slice(&key);
     *state.vault.lock().expect("vault lock poisoned") = Some(VaultState {
         key: Secret::new(fixed),
+        master_password: Secret::new(String::new()),
     });
     Ok(())
 }

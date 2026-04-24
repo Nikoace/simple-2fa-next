@@ -26,6 +26,12 @@ pub enum AppError {
 
     #[error("io error: {0}")]
     Io(String),
+
+    #[error("sync error: {0}")]
+    Sync(String),
+
+    #[error("sync auth failed")]
+    SyncAuthFailed,
 }
 
 impl From<rusqlite::Error> for AppError {

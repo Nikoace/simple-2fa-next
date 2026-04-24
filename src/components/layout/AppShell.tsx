@@ -1,7 +1,8 @@
 import { Outlet, useNavigate } from "@tanstack/react-router";
-import { Moon, Settings, Sun } from "lucide-react";
+import { Moon, RefreshCw, Settings, Sun, TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { listen } from "@tauri-apps/api/event";
 
 import { ExportDialog } from "@/components/import/ExportDialog";
 import { ImportDialog } from "@/components/import/ImportDialog";
@@ -12,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getSyncStatus } from "@/lib/tauri";
 import { cn } from "@/lib/utils";
 import { applyTheme, useSettingsStore } from "@/stores/settings";
 import { useVaultStore } from "@/stores/vault";
@@ -30,6 +32,15 @@ export function AppShell() {
   const { theme, setTheme } = useSettingsStore();
   const lock = useVaultStore((state) => state.lock);
   const vaultStatus = useVaultStore((s) => s.status);
+  const [syncStatus, setSyncStatus] = useState<{
+    lastSync: string | null;
+    lastError: string | null;
+    inProgress: boolean;
+  }>({
+    lastSync: null,
+    lastError: null,
+    inProgress: false,
+  });
 
   useEffect(() => {
     applyTheme(theme);
@@ -39,6 +50,54 @@ export function AppShell() {
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, [theme]);
+
+  useEffect(() => {
+    if (vaultStatus !== "unlocked") {
+      return;
+    }
+
+    void (async () => {
+      try {
+        setSyncStatus(await getSyncStatus());
+      } catch {
+        // Ignore when sync backend is not configured yet.
+      }
+    })();
+
+    let mounted = true;
+    const stop = listen<{
+      lastSync: string | null;
+      lastError: string | null;
+      inProgress: boolean;
+    }>("sync://status-changed", (event) => {
+      if (mounted) {
+        setSyncStatus(event.payload);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      void stop.then((fn) => fn());
+    };
+  }, [vaultStatus]);
+
+  let badgeIcon = <RefreshCw className="size-3" />;
+  if (syncStatus.inProgress) {
+    badgeIcon = <RefreshCw className="size-3 animate-spin" />;
+  } else if (syncStatus.lastError) {
+    badgeIcon = <TriangleAlert className="size-3 text-destructive" />;
+  }
+
+  let badgeText = t("sync.badge_idle");
+  if (syncStatus.inProgress) {
+    badgeText = t("sync.badge_syncing");
+  } else if (syncStatus.lastError) {
+    badgeText = t("sync.badge_error");
+  } else if (syncStatus.lastSync) {
+    badgeText = t("sync.badge_last_sync", {
+      time: new Date(syncStatus.lastSync).toLocaleTimeString(),
+    });
+  }
 
   return (
     <div className="relative min-h-screen bg-background text-foreground">
@@ -88,6 +147,10 @@ export function AppShell() {
 
           {vaultStatus === "unlocked" && (
             <>
+              <div className="inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs text-muted-foreground">
+                {badgeIcon}
+                <span>{badgeText}</span>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"

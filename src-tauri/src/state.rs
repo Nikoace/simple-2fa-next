@@ -2,8 +2,11 @@ use rusqlite::Connection;
 use secrecy::{ExposeSecret, Secret};
 use std::sync::Mutex;
 
+use crate::sync::SyncStatus;
+
 pub struct VaultState {
     pub key: Secret<[u8; 32]>,
+    pub master_password: Secret<String>,
 }
 
 impl VaultState {
@@ -15,6 +18,7 @@ impl VaultState {
 pub struct AppState {
     pub db: Mutex<Connection>,
     pub vault: Mutex<Option<VaultState>>,
+    pub sync_status: Mutex<SyncStatus>,
 }
 
 impl AppState {
@@ -22,6 +26,11 @@ impl AppState {
         Self {
             db: Mutex::new(conn),
             vault: Mutex::new(None),
+            sync_status: Mutex::new(SyncStatus {
+                last_sync: None,
+                last_error: None,
+                in_progress: false,
+            }),
         }
     }
 }

@@ -10,6 +10,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { MainPage } from "@/pages/MainPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { SetupPage } from "@/pages/SetupPage";
+import { SyncSettingsPage } from "@/pages/SyncSettingsPage";
 import { UnlockPage } from "@/pages/UnlockPage";
 import { useVaultStore } from "@/stores/vault";
 
@@ -59,7 +60,20 @@ const settingsRoute = createRoute({
   component: SettingsPage,
 });
 
-const routeTree = rootRoute.addChildren([mainRoute, unlockRoute, setupRoute, settingsRoute]);
+const syncSettingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/settings/sync",
+  beforeLoad: requireUnlocked,
+  component: SyncSettingsPage,
+});
+
+const routeTree = rootRoute.addChildren([
+  mainRoute,
+  unlockRoute,
+  setupRoute,
+  settingsRoute,
+  syncSettingsRoute,
+]);
 
 export const router = createRouter({ routeTree });
 

@@ -59,6 +59,29 @@ export type ImportPreview = {
   sourceVersion: number;
 };
 
+export type SyncConfig =
+  | {
+      type: "WebDav";
+      url: string;
+      username: string;
+      password: string;
+      remotePath: string;
+    }
+  | {
+      type: "S3";
+      bucket: string;
+      prefix: string;
+      region: string;
+      accessKey: string;
+      secretKey: string;
+    };
+
+export type SyncStatus = {
+  lastSync: string | null;
+  lastError: string | null;
+  inProgress: boolean;
+};
+
 export const isVaultInitialized = () => invoke<boolean>("is_vault_initialized");
 
 export const setupVault = (password: string) => invoke<void>("setup_vault", { password });
@@ -107,3 +130,11 @@ export const parseOtpauthUri = (uri: string) =>
 
 export const exportVaultToFile = (path: string, password: string) =>
   invoke<void>("export_vault_to_file", { path, password });
+
+export const configureSync = (config: SyncConfig) => invoke<void>("configure_sync", { config });
+
+export const syncNow = () => invoke<SyncStatus>("sync_now");
+
+export const getSyncStatus = () => invoke<SyncStatus>("get_sync_status");
+
+export const disableSync = () => invoke<void>("disable_sync");

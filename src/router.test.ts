@@ -7,7 +7,7 @@ describe("router", () => {
     expect(router.routeTree).toBeDefined();
   });
 
-  it("has top-level routes including /settings", () => {
+  it("has top-level routes including /settings and /settings/sync", () => {
     const rawPaths = router.routeTree.children?.map((r: { path: string }) => r.path) ?? [];
     // Normalize to leading-slash form regardless of how TanStack Router stores them internally.
     const paths = rawPaths.map((p: string) => (p.startsWith("/") ? p : `/${p}`));
@@ -15,5 +15,6 @@ describe("router", () => {
     expect(paths).toContain("/unlock");
     expect(paths).toContain("/setup");
     expect(paths).toContain("/settings");
+    expect(paths).toContain("/settings/sync");
   });
 });

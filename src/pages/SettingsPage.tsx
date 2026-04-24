@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -92,6 +93,15 @@ export function SettingsPage() {
       </div>
 
       {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
+
+      <div className="mt-4 border-t pt-4">
+        <p className="text-sm text-muted-foreground">{t("sync.entry_desc")}</p>
+        <Link to="/settings/sync" className="mt-2 inline-block">
+          <Button type="button" variant="outline">
+            {t("sync.entry")}
+          </Button>
+        </Link>
+      </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">

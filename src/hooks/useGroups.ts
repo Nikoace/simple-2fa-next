@@ -9,7 +9,7 @@ export function useGroups() {
     queryKey: groupsQueryKey,
     queryFn: listGroups,
     refetchInterval: 60_000,
-    staleTime: 30_000,
+    staleTime: 0,
   });
 
   return { ...query, queryKey: groupsQueryKey };

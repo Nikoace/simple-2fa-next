@@ -3,9 +3,11 @@ import { persist } from "zustand/middleware";
 
 export type ThemeMode = "light" | "dark" | "system";
 
-type SettingsState = {
+export type SettingsState = {
   theme: ThemeMode;
+  biometricEnabled: boolean;
   setTheme: (theme: ThemeMode) => void;
+  setBiometricEnabled: (enabled: boolean) => void;
 };
 
 export function applyTheme(theme: ThemeMode) {
@@ -18,9 +20,13 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       theme: "system",
+      biometricEnabled: false,
       setTheme: (theme) => {
         set({ theme });
         applyTheme(theme);
+      },
+      setBiometricEnabled: (enabled) => {
+        set({ biometricEnabled: enabled });
       },
     }),
     { name: "s2fa-settings" },

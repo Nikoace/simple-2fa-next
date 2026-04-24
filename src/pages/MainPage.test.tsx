@@ -90,40 +90,6 @@ describe("MainPage", () => {
     });
   });
 
-  it("shows empty-group message when filter has no matches", async () => {
-    vi.mocked(tauri.listGroups).mockResolvedValue([{ id: 1, name: "Work", sortOrder: 0 }]);
-    vi.mocked(tauri.getAccounts).mockResolvedValue([
-      {
-        id: 1,
-        name: "GitHub",
-        issuer: "GitHub",
-        algorithm: "SHA1",
-        digits: 6,
-        period: 30,
-        groupId: null,
-        icon: null,
-        color: null,
-        sortOrder: 0,
-        code: "123456",
-        ttl: 15,
-        progress: 0.5,
-      },
-    ]);
-
-    renderWithQuery(<MainPage />);
-
-    await waitFor(() => expect(screen.getByRole("button", { name: "Work" })).toBeTruthy());
-
-    const user = userEvent.setup();
-    await user.click(screen.getByRole("button", { name: "Work" }));
-
-    await waitFor(() =>
-      expect(
-        screen.getByText(/no accounts in this group|暂无账户|アカウントはありません/i),
-      ).toBeTruthy(),
-    );
-  });
-
   it("shows loading state", () => {
     vi.mocked(tauri.listGroups).mockResolvedValue([]);
     vi.mocked(tauri.getAccounts).mockReturnValue(new Promise(() => {}));

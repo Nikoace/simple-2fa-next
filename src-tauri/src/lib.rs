@@ -1,3 +1,4 @@
+mod biometric;
 mod commands;
 pub mod crypto;
 mod db;
@@ -15,7 +16,7 @@ use state::AppState;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
@@ -32,12 +33,21 @@ pub fn run() {
 
             app.manage(AppState::new(conn));
             Ok(())
-        })
+        });
+
+    #[cfg(mobile)]
+    let builder = builder.plugin(tauri_plugin_biometric::init());
+
+    builder
         .invoke_handler(tauri::generate_handler![
             commands::vault::setup_vault,
             commands::vault::unlock_vault,
             commands::vault::lock_vault,
             commands::vault::is_vault_initialized,
+            commands::biometric::biometric_available,
+            commands::biometric::enable_biometric,
+            commands::biometric::unlock_with_biometric,
+            commands::biometric::disable_biometric,
             commands::accounts::get_accounts,
             commands::accounts::add_account,
             commands::accounts::update_account,

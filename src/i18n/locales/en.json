@@ -6,6 +6,7 @@
     "unlock_title": "Unlock Vault",
     "unlock_subtitle": "Enter your master password to access your accounts",
     "unlock_submit": "Unlock",
+    "unlock_with_biometric": "Unlock with Biometric",
     "password_placeholder": "Master password",
     "wrong_password": "Wrong password, please try again"
   },
@@ -46,13 +47,25 @@
     "new_name_label": "Group name",
     "none": "No group",
     "select_label": "Group",
-    "empty_in_filter": "No accounts in this group",
-    "delete_confirm_title": "Delete Group"
+    "empty_in_filter": "No accounts in this group"
   },
   "nav": {
     "import": "Import",
     "export": "Export",
-    "lock": "Lock"
+    "lock": "Lock",
+    "settings": "Settings"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage security and unlock options.",
+    "biometric_title": "Biometric Unlock",
+    "biometric_desc": "Use your device biometric prompt to unlock the vault.",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "enable_biometric_title": "Enable Biometric Unlock",
+    "enable_biometric_desc": "Enter your master password to enable biometric unlock.",
+    "confirm": "Confirm",
+    "save_error": "Operation failed. Please try again."
   },
   "import": {
     "title": "Import Accounts",

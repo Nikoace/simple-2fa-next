@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { applyTheme } from "./settings";
+import { applyTheme, useSettingsStore } from "./settings";
 
 beforeEach(() => {
   document.documentElement.classList.remove("dark");
@@ -36,5 +36,16 @@ describe("applyTheme", () => {
     } as MediaQueryList);
     applyTheme("system");
     expect(document.documentElement.classList.contains("dark")).toBe(false);
+  });
+});
+
+describe("useSettingsStore", () => {
+  it("defaults biometricEnabled to false", () => {
+    expect(useSettingsStore.getState().biometricEnabled).toBe(false);
+  });
+
+  it("updates biometricEnabled", () => {
+    useSettingsStore.getState().setBiometricEnabled(true);
+    expect(useSettingsStore.getState().biometricEnabled).toBe(true);
   });
 });

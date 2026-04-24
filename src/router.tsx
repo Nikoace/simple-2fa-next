@@ -8,6 +8,7 @@ import {
 
 import { AppShell } from "@/components/layout/AppShell";
 import { MainPage } from "@/pages/MainPage";
+import { SettingsPage } from "@/pages/SettingsPage";
 import { SetupPage } from "@/pages/SetupPage";
 import { UnlockPage } from "@/pages/UnlockPage";
 import { useVaultStore } from "@/stores/vault";
@@ -51,7 +52,14 @@ const setupRoute = createRoute({
   component: SetupPage,
 });
 
-const routeTree = rootRoute.addChildren([mainRoute, unlockRoute, setupRoute]);
+const settingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/settings",
+  beforeLoad: requireUnlocked,
+  component: SettingsPage,
+});
+
+const routeTree = rootRoute.addChildren([mainRoute, unlockRoute, setupRoute, settingsRoute]);
 
 export const router = createRouter({ routeTree });
 

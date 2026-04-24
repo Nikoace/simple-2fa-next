@@ -8,20 +8,12 @@ use crate::{
 
 #[tauri::command]
 pub fn list_groups(state: State<'_, AppState>) -> Result<Vec<Group>, AppError> {
-    let vault = state.vault.lock().expect("vault lock poisoned");
-    if vault.is_none() {
-        return Err(AppError::VaultLocked);
-    }
     let db = state.db.lock().expect("db lock poisoned");
     GroupRepo(&db).list()
 }
 
 #[tauri::command]
 pub fn create_group(name: String, state: State<'_, AppState>) -> Result<Group, AppError> {
-    let vault = state.vault.lock().expect("vault lock poisoned");
-    if vault.is_none() {
-        return Err(AppError::VaultLocked);
-    }
     let db = state.db.lock().expect("db lock poisoned");
     GroupRepo(&db).create(&name)
 }
@@ -32,20 +24,12 @@ pub fn rename_group(
     name: String,
     state: State<'_, AppState>,
 ) -> Result<Group, AppError> {
-    let vault = state.vault.lock().expect("vault lock poisoned");
-    if vault.is_none() {
-        return Err(AppError::VaultLocked);
-    }
     let db = state.db.lock().expect("db lock poisoned");
     GroupRepo(&db).rename(id, &name)
 }
 
 #[tauri::command]
 pub fn delete_group(id: i64, state: State<'_, AppState>) -> Result<(), AppError> {
-    let vault = state.vault.lock().expect("vault lock poisoned");
-    if vault.is_none() {
-        return Err(AppError::VaultLocked);
-    }
     let db = state.db.lock().expect("db lock poisoned");
     GroupRepo(&db).delete(id)
 }

@@ -3,16 +3,6 @@ import { MoreHorizontal, Plus } from "lucide-react";
 import { type KeyboardEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -35,79 +25,50 @@ export function GroupBar({ groups, selectedGroupId, onSelect }: Readonly<Props>)
   const qc = useQueryClient();
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
-  const [renamingId, setRenamingId] = useState<number | null>(null);
-  const [renameValue, setRenameValue] = useState("");
-  const [deletingGroupId, setDeletingGroupId] = useState<number | null>(null);
-  const [mutationError, setMutationError] = useState<string | null>(null);
 
   async function submitNewGroup() {
     const name = newName.trim();
-    if (!name) return;
-    setMutationError(null);
-    try {
-      await createGroup(name);
-      await qc.invalidateQueries({ queryKey: ["groups"] });
-      setNewName("");
-      setCreating(false);
-    } catch (err) {
-      setMutationError(err instanceof Error ? err.message : t("common.error"));
+    if (!name) {
+      return;
+    }
+    await createGroup(name);
+    await qc.invalidateQueries({ queryKey: ["groups"] });
+    setNewName("");
+    setCreating(false);
+  }
+
+  async function handleRename(groupId: number, currentName: string) {
+    const nextName = globalThis.prompt(t("groups.rename_prompt"), currentName);
+    if (!nextName || nextName.trim() === currentName) {
+      return;
+    }
+    await renameGroup(groupId, nextName.trim());
+    await qc.invalidateQueries({ queryKey: ["groups"] });
+  }
+
+  async function handleDelete(groupId: number) {
+    const confirmed = globalThis.confirm(t("groups.delete_confirm"));
+    if (!confirmed) {
+      return;
+    }
+    await deleteGroup(groupId);
+    await qc.invalidateQueries({ queryKey: ["groups"] });
+    await qc.invalidateQueries({ queryKey: ["accounts"] });
+    if (selectedGroupId === groupId) {
+      onSelect(null);
     }
   }
 
-  async function submitRename() {
-    if (renamingId === null) return;
-    const name = renameValue.trim();
-    if (!name) return;
-    setMutationError(null);
-    try {
-      await renameGroup(renamingId, name);
-      await qc.invalidateQueries({ queryKey: ["groups"] });
-      setRenamingId(null);
-      setRenameValue("");
-    } catch (err) {
-      setMutationError(err instanceof Error ? err.message : t("common.error"));
-    }
-  }
-
-  async function confirmDelete() {
-    if (deletingGroupId === null) return;
-    setMutationError(null);
-    try {
-      const id = deletingGroupId;
-      setDeletingGroupId(null);
-      await deleteGroup(id);
-      await qc.invalidateQueries({ queryKey: ["groups"] });
-      await qc.invalidateQueries({ queryKey: ["accounts"] });
-      if (selectedGroupId === id) onSelect(null);
-    } catch (err) {
-      setMutationError(err instanceof Error ? err.message : t("common.error"));
-    }
-  }
-
-  function onNewNameKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+  function onInputKeyDown(event: KeyboardEvent<HTMLInputElement>) {
     if (event.key === "Enter") {
       event.preventDefault();
       void submitNewGroup();
-    } else if (event.key === "Escape") {
+      return;
+    }
+    if (event.key === "Escape") {
       setCreating(false);
       setNewName("");
     }
-  }
-
-  function onRenameKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      void submitRename();
-    } else if (event.key === "Escape") {
-      setRenamingId(null);
-      setRenameValue("");
-    }
-  }
-
-  function startRename(group: Group) {
-    setRenamingId(group.id);
-    setRenameValue(group.name);
-    setCreating(false);
   }
 
   return (
@@ -140,12 +101,12 @@ export function GroupBar({ groups, selectedGroupId, onSelect }: Readonly<Props>)
                 <MoreHorizontal className="size-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => startRename(group)}>
+                <DropdownMenuItem onClick={() => void handleRename(group.id, group.name)}>
                   {t("groups.rename")}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-destructive"
-                  onClick={() => setDeletingGroupId(group.id)}
+                  onClick={() => void handleDelete(group.id)}
                 >
                   {t("groups.delete")}
                 </DropdownMenuItem>
@@ -164,48 +125,12 @@ export function GroupBar({ groups, selectedGroupId, onSelect }: Readonly<Props>)
         <Input
           autoFocus
           value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          onKeyDown={onNewNameKeyDown}
+          onChange={(event) => setNewName(event.target.value)}
+          onKeyDown={onInputKeyDown}
           placeholder={t("groups.new_name_placeholder")}
           aria-label={t("groups.new_name_label")}
         />
       )}
-
-      {renamingId !== null && (
-        <Input
-          autoFocus
-          value={renameValue}
-          onChange={(e) => setRenameValue(e.target.value)}
-          onKeyDown={onRenameKeyDown}
-          placeholder={t("groups.new_name_placeholder")}
-          aria-label={t("groups.rename_prompt")}
-        />
-      )}
-
-      {mutationError && <p className="text-sm text-destructive">{mutationError}</p>}
-
-      <AlertDialog
-        open={deletingGroupId !== null}
-        onOpenChange={(open) => !open && setDeletingGroupId(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("groups.delete_confirm_title")}</AlertDialogTitle>
-            <AlertDialogDescription>{t("groups.delete_confirm")}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeletingGroupId(null)}>
-              {t("accounts.cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:opacity-90"
-              onClick={() => void confirmDelete()}
-            >
-              {t("accounts.delete")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

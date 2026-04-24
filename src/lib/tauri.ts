@@ -18,6 +18,12 @@ export type AccountWithCode = {
 
 export type Account = Omit<AccountWithCode, "code" | "ttl" | "progress">;
 
+export type Group = {
+  id: number;
+  name: string;
+  sortOrder: number;
+};
+
 export type AddAccountInput = {
   name: string;
   issuer?: string;
@@ -35,7 +41,7 @@ export type UpdateAccountInput = {
   issuer?: string;
   icon?: string;
   color?: string;
-  groupId?: number;
+  groupId?: number | null;
   notes?: string;
 };
 
@@ -59,6 +65,14 @@ export const setupVault = (password: string) => invoke<void>("setup_vault", { pa
 
 export const unlockVault = (password: string) => invoke<void>("unlock_vault", { password });
 
+export const biometricAvailable = () => invoke<boolean>("biometric_available");
+
+export const enableBiometric = (password: string) => invoke<void>("enable_biometric", { password });
+
+export const unlockWithBiometric = () => invoke<void>("unlock_with_biometric");
+
+export const disableBiometric = () => invoke<void>("disable_biometric");
+
 export const lockVault = () => invoke<void>("lock_vault");
 
 export const getAccounts = () => invoke<AccountWithCode[]>("get_accounts");
@@ -72,6 +86,15 @@ export const updateAccount = (id: number, input: UpdateAccountInput) =>
 export const deleteAccount = (id: number) => invoke<void>("delete_account", { id });
 
 export const reorderAccounts = (ids: number[]) => invoke<void>("reorder_accounts", { ids });
+
+export const listGroups = () => invoke<Group[]>("list_groups");
+
+export const createGroup = (name: string) => invoke<Group>("create_group", { name });
+
+export const renameGroup = (id: number, name: string) =>
+  invoke<Group>("rename_group", { id, name });
+
+export const deleteGroup = (id: number) => invoke<void>("delete_group", { id });
 
 export const importS2faFile = (path: string, password: string) =>
   invoke<ImportPreview>("import_s2fa_file", { path, password });

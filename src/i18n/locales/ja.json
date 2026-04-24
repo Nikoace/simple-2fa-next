@@ -6,6 +6,7 @@
     "unlock_title": "Vault を解錠",
     "unlock_subtitle": "マスターパスワードを入力してアカウントにアクセス",
     "unlock_submit": "解錠",
+    "unlock_with_biometric": "生体認証で解錠",
     "password_placeholder": "マスターパスワード",
     "wrong_password": "パスワードが違います"
   },
@@ -46,13 +47,25 @@
     "new_name_label": "グループ名",
     "none": "未分類",
     "select_label": "グループ",
-    "empty_in_filter": "このグループにアカウントはありません",
-    "delete_confirm_title": "グループを削除"
+    "empty_in_filter": "このグループにアカウントはありません"
   },
   "nav": {
     "import": "インポート",
     "export": "エクスポート",
-    "lock": "ロック"
+    "lock": "ロック",
+    "settings": "設定"
+  },
+  "settings": {
+    "title": "設定",
+    "description": "セキュリティと解錠オプションを管理します。",
+    "biometric_title": "生体認証解錠",
+    "biometric_desc": "端末の生体認証で Vault を解錠します。",
+    "enabled": "有効",
+    "disabled": "無効",
+    "enable_biometric_title": "生体認証を有効化",
+    "enable_biometric_desc": "有効化するにはマスターパスワードを入力してください。",
+    "confirm": "確認",
+    "save_error": "操作に失敗しました。もう一度お試しください。"
   },
   "import": {
     "title": "アカウントをインポート",

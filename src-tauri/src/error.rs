@@ -18,6 +18,9 @@ pub enum AppError {
     #[error("vault is locked")]
     VaultLocked,
 
+    #[error("biometric is not enabled")]
+    BiometricNotEnabled,
+
     #[error("invalid input: {0}")]
     InvalidInput(String),
 

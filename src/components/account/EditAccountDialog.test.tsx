@@ -4,7 +4,7 @@ import { userEvent } from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/tauri", () => ({ updateAccount: vi.fn() }));
+vi.mock("@/lib/tauri", () => ({ updateAccount: vi.fn(), listGroups: vi.fn() }));
 
 import type { AccountWithCode } from "@/lib/tauri";
 import * as tauri from "@/lib/tauri";
@@ -32,7 +32,13 @@ const account: AccountWithCode = {
 };
 const onClose = vi.fn();
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.mocked(tauri.listGroups).mockResolvedValue([
+    { id: 2, name: "Work", sortOrder: 0 },
+    { id: 3, name: "Personal", sortOrder: 1 },
+  ]);
+});
 
 describe("EditAccountDialog", () => {
   it("pre-fills name and issuer fields", () => {
@@ -52,7 +58,10 @@ describe("EditAccountDialog", () => {
     await user.click(screen.getByRole("button", { name: /save|保存/i }));
 
     await waitFor(() =>
-      expect(tauri.updateAccount).toHaveBeenCalledWith(1, expect.objectContaining({ name: "GL" })),
+      expect(tauri.updateAccount).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ name: "GL", groupId: null }),
+      ),
     );
   });
 

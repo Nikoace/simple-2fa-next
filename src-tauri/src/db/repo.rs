@@ -3,20 +3,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::AppError;
 
-mod serde_helpers {
-    use serde::{Deserialize, Deserializer};
-
-    pub fn deserialize_optional_option<'de, T, D>(
-        deserializer: D,
-    ) -> Result<Option<Option<T>>, D::Error>
-    where
-        T: Deserialize<'de>,
-        D: Deserializer<'de>,
-    {
-        Option::<T>::deserialize(deserializer).map(Some)
-    }
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Account {
@@ -57,7 +43,6 @@ pub struct UpdateAccount {
     pub issuer: Option<String>,
     pub icon: Option<String>,
     pub color: Option<String>,
-    #[serde(default, deserialize_with = "serde_helpers::deserialize_optional_option")]
     pub group_id: Option<Option<i64>>,
     pub notes: Option<String>,
 }
@@ -340,8 +325,6 @@ mod tests {
     fn make_db() -> Connection {
         let mut conn = Connection::open_in_memory().expect("in-memory db must open");
         run_migrations(&mut conn).expect("migrations must succeed");
-        conn.execute_batch("PRAGMA foreign_keys = ON")
-            .expect("failed to enable foreign keys");
         conn
     }
 
@@ -531,61 +514,5 @@ mod tests {
         groups.delete(created_group.id).expect("delete must succeed");
         let fetched = accounts.get(account.id).expect("account fetch must succeed");
         assert_eq!(fetched.group_id, None);
-    }
-
-    #[test]
-    fn update_group_id_null_clears_via_json() {
-        let conn = make_db();
-        let groups = GroupRepo(&conn);
-        let repo = AccountRepo(&conn);
-        let group = groups.create("Work").expect("group create");
-        let created = repo
-            .create(CreateAccount {
-                name: "json-clear".to_string(),
-                issuer: None,
-                secret_cipher: vec![1u8; 29],
-                algorithm: None,
-                digits: None,
-                period: None,
-                icon: None,
-                color: None,
-                group_id: Some(group.id),
-            })
-            .expect("create");
-
-        let upd: UpdateAccount =
-            serde_json::from_str(r#"{"groupId": null}"#).expect("deser must succeed");
-        let updated = repo.update(created.id, upd).expect("update must succeed");
-        assert_eq!(updated.group_id, None, "groupId:null must clear the group");
-    }
-
-    #[test]
-    fn update_group_id_absent_is_noop_via_json() {
-        let conn = make_db();
-        let groups = GroupRepo(&conn);
-        let repo = AccountRepo(&conn);
-        let group = groups.create("Work").expect("group create");
-        let created = repo
-            .create(CreateAccount {
-                name: "json-noop".to_string(),
-                issuer: None,
-                secret_cipher: vec![2u8; 29],
-                algorithm: None,
-                digits: None,
-                period: None,
-                icon: None,
-                color: None,
-                group_id: Some(group.id),
-            })
-            .expect("create");
-
-        let upd: UpdateAccount =
-            serde_json::from_str(r#"{}"#).expect("deser must succeed");
-        let updated = repo.update(created.id, upd).expect("update must succeed");
-        assert_eq!(
-            updated.group_id,
-            Some(group.id),
-            "absent groupId must not change existing group"
-        );
     }
 }

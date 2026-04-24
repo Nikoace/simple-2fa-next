@@ -1,5 +1,5 @@
-import { Outlet } from "@tanstack/react-router";
-import { Moon, Sun } from "lucide-react";
+import { Outlet, useNavigate } from "@tanstack/react-router";
+import { Moon, Settings, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -24,6 +24,7 @@ const LANG_LABELS: Record<string, string> = {
 
 export function AppShell() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [importOpen, setImportOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const { theme, setTheme } = useSettingsStore();
@@ -106,8 +107,21 @@ export function AppShell() {
               <Button
                 variant="ghost"
                 size="sm"
+                aria-label={t("nav.settings")}
                 className={cn("text-muted-foreground hover:text-foreground")}
-                onClick={() => void lock()}
+                onClick={() => {
+                  void navigate({ to: "/settings" });
+                }}
+              >
+                <Settings className="size-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn("text-muted-foreground hover:text-foreground")}
+                onClick={async () => {
+                  await lock();
+                }}
               >
                 {t("nav.lock")}
               </Button>

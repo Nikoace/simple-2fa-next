@@ -7,13 +7,17 @@ vi.mock("@tauri-apps/api/core", () => ({
 import { invoke } from "@tauri-apps/api/core";
 import {
   addAccount,
+  biometricAvailable,
   deleteAccount,
+  disableBiometric,
+  enableBiometric,
   getAccounts,
   isVaultInitialized,
   lockVault,
   reorderAccounts,
   setupVault,
   unlockVault,
+  unlockWithBiometric,
   updateAccount,
 } from "./tauri";
 
@@ -31,6 +35,26 @@ describe("tauri.ts wrappers", () => {
   it("unlockVault calls invoke with correct command", async () => {
     await unlockVault("pw");
     expect(invoke).toHaveBeenCalledWith("unlock_vault", { password: "pw" });
+  });
+
+  it("biometricAvailable calls invoke with correct command", async () => {
+    await biometricAvailable();
+    expect(invoke).toHaveBeenCalledWith("biometric_available");
+  });
+
+  it("enableBiometric calls invoke with correct command", async () => {
+    await enableBiometric("pw");
+    expect(invoke).toHaveBeenCalledWith("enable_biometric", { password: "pw" });
+  });
+
+  it("unlockWithBiometric calls invoke with correct command", async () => {
+    await unlockWithBiometric();
+    expect(invoke).toHaveBeenCalledWith("unlock_with_biometric");
+  });
+
+  it("disableBiometric calls invoke with correct command", async () => {
+    await disableBiometric();
+    expect(invoke).toHaveBeenCalledWith("disable_biometric");
   });
 
   it("lockVault calls invoke with correct command", async () => {

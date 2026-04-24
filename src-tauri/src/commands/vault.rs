@@ -81,6 +81,20 @@ pub fn is_vault_initialized(state: State<'_, AppState>) -> Result<bool, AppError
     Ok(get_meta(&db, META_SALT)?.is_some())
 }
 
+pub(crate) fn verify_password(state: &AppState, password: &str) -> Result<(), AppError> {
+    let db = state.db.lock().expect("db lock poisoned");
+    let salt_hex = get_meta(&db, META_SALT)?
+        .ok_or_else(|| AppError::InvalidInput("vault not initialized".into()))?;
+    let salt = hex::decode(&salt_hex).map_err(|_| AppError::Crypto("corrupt salt".into()))?;
+    let verifier_hex = get_meta(&db, META_VERIFIER)?
+        .ok_or_else(|| AppError::InvalidInput("verifier missing".into()))?;
+    let verifier_ct =
+        hex::decode(&verifier_hex).map_err(|_| AppError::Crypto("corrupt verifier".into()))?;
+    let key = derive_key(password, &salt)?;
+    open(&key, &verifier_ct).map_err(|_| AppError::InvalidInput("wrong password".into()))?;
+    Ok(())
+}
+
 fn get_meta(db: &rusqlite::Connection, key: &str) -> Result<Option<String>, AppError> {
     match db.query_row(
         "SELECT value FROM meta WHERE key = ?1",

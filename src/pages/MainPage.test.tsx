@@ -112,9 +112,7 @@ describe("MainPage", () => {
 
     renderWithQuery(<MainPage />);
 
-    await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Work" })).toBeTruthy(),
-    );
+    await waitFor(() => expect(screen.getByRole("button", { name: "Work" })).toBeTruthy());
 
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "Work" }));
@@ -139,7 +137,9 @@ describe("MainPage", () => {
     renderWithQuery(<MainPage />);
     await waitFor(() => {
       expect(screen.getByText(/no accounts yet|还没有账户|アカウントがありません/i)).toBeTruthy();
-      expect(screen.getByRole("button", { name: /add account|添加账户|アカウントを追加/i })).toBeTruthy();
+      expect(
+        screen.getByRole("button", { name: /add account|添加账户|アカウントを追加/i }),
+      ).toBeTruthy();
     });
   });
 
@@ -168,7 +168,9 @@ describe("MainPage", () => {
     await waitFor(() => {
       expect(screen.getAllByText("GitHub").length).toBeGreaterThan(0);
       expect(screen.getByText("123 456")).toBeTruthy();
-      expect(screen.getByRole("button", { name: /add account|添加账户|アカウントを追加/i })).toBeTruthy();
+      expect(
+        screen.getByRole("button", { name: /add account|添加账户|アカウントを追加/i }),
+      ).toBeTruthy();
     });
   });
 });

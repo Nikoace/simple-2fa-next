@@ -4,8 +4,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::AppError;
 
-pub mod webdav;
 pub mod s3;
+pub mod webdav;
 
 #[async_trait]
 pub trait SyncProvider: Send + Sync {
@@ -114,7 +114,10 @@ mod tests {
     #[async_trait]
     impl SyncProvider for MockProvider {
         async fn upload(&self, data: &[u8], _remote_path: &str) -> Result<(), AppError> {
-            self.uploads.lock().expect("uploads lock").push(data.to_vec());
+            self.uploads
+                .lock()
+                .expect("uploads lock")
+                .push(data.to_vec());
             Ok(())
         }
 

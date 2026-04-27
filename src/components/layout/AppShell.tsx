@@ -1,8 +1,8 @@
 import { Outlet, useNavigate } from "@tanstack/react-router";
+import { listen } from "@tauri-apps/api/event";
 import { Moon, RefreshCw, Settings, Sun, TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { listen } from "@tauri-apps/api/event";
 
 import { ExportDialog } from "@/components/import/ExportDialog";
 import { ImportDialog } from "@/components/import/ImportDialog";

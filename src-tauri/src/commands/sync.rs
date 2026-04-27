@@ -8,14 +8,14 @@ use crate::{
     crypto::{open, seal},
     db::repo::{AccountRepo, CreateAccount},
     error::AppError,
-    importer::{export::ExportAccount, export::export_s2fa, import_s2fa},
+    importer::{export::export_s2fa, export::ExportAccount, import_s2fa},
     state::AppState,
-    sync::{SyncConfig, SyncStatus, sync_vault},
+    sync::{sync_vault, SyncConfig, SyncStatus},
 };
 
+use super::vault::{get_meta, set_meta};
 use crate::sync::s3::S3Provider;
 use crate::sync::webdav::WebDavProvider;
-use super::vault::{get_meta, set_meta};
 
 const META_SYNC_CONFIG: &str = "sync_config";
 const REMOTE_FILE: &str = "vault.s2fa";
@@ -235,7 +235,8 @@ fn import_remote_vault(state: &AppState, bytes: &[u8]) -> Result<(), AppError> {
 
 fn get_local_last_modified(state: &AppState) -> Result<Option<DateTime<Utc>>, AppError> {
     let db = state.db.lock().expect("db lock poisoned");
-    let last: Option<i64> = db.query_row("SELECT MAX(updated_at) FROM accounts", [], |r| r.get(0))?;
+    let last: Option<i64> =
+        db.query_row("SELECT MAX(updated_at) FROM accounts", [], |r| r.get(0))?;
 
     Ok(last.and_then(DateTime::<Utc>::from_timestamp_millis))
 }
@@ -252,7 +253,7 @@ mod tests {
         sync::SyncConfig,
     };
 
-    use super::{META_SYNC_CONFIG, load_sync_config};
+    use super::{load_sync_config, META_SYNC_CONFIG};
 
     fn make_state_with_password(password: &str) -> AppState {
         let mut conn = Connection::open_in_memory().expect("in-memory db");
@@ -308,7 +309,12 @@ mod tests {
 
         let loaded = load_sync_config(&state).expect("load");
         match loaded {
-            SyncConfig::WebDav { url, username, remote_path, .. } => {
+            SyncConfig::WebDav {
+                url,
+                username,
+                remote_path,
+                ..
+            } => {
                 assert_eq!(url, "https://dav.example.com");
                 assert_eq!(username, "alice");
                 assert_eq!(remote_path, "vault.s2fa");
@@ -326,8 +332,14 @@ mod tests {
             remote_path: "r".into(),
         };
         let json = serde_json::to_value(&config).expect("serialize");
-        assert!(json.get("remotePath").is_some(), "remotePath key must be present");
-        assert!(json.get("remote_path").is_none(), "snake_case key must not appear");
+        assert!(
+            json.get("remotePath").is_some(),
+            "remotePath key must be present"
+        );
+        assert!(
+            json.get("remote_path").is_none(),
+            "snake_case key must not appear"
+        );
 
         let config = SyncConfig::S3 {
             bucket: "b".into(),
@@ -337,9 +349,18 @@ mod tests {
             secret_key: "sk".into(),
         };
         let json = serde_json::to_value(&config).expect("serialize");
-        assert!(json.get("accessKey").is_some(), "accessKey key must be present");
-        assert!(json.get("secretKey").is_some(), "secretKey key must be present");
-        assert!(json.get("access_key").is_none(), "snake_case key must not appear");
+        assert!(
+            json.get("accessKey").is_some(),
+            "accessKey key must be present"
+        );
+        assert!(
+            json.get("secretKey").is_some(),
+            "secretKey key must be present"
+        );
+        assert!(
+            json.get("access_key").is_none(),
+            "snake_case key must not appear"
+        );
     }
 
     #[test]
@@ -354,7 +375,11 @@ mod tests {
         let json = r#"{"type":"S3","bucket":"b","prefix":"p","region":"r","accessKey":"ak","secretKey":"sk"}"#;
         let config: SyncConfig = serde_json::from_str(json).expect("deserialize");
         match config {
-            SyncConfig::S3 { access_key, secret_key, .. } => {
+            SyncConfig::S3 {
+                access_key,
+                secret_key,
+                ..
+            } => {
                 assert_eq!(access_key, "ak");
                 assert_eq!(secret_key, "sk");
             }

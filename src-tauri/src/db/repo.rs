@@ -222,7 +222,9 @@ impl<'a> GroupRepo<'a> {
     pub fn create(&self, name: &str) -> Result<Group, AppError> {
         let name = name.trim();
         if name.is_empty() {
-            return Err(AppError::InvalidInput("group name must not be empty".into()));
+            return Err(AppError::InvalidInput(
+                "group name must not be empty".into(),
+            ));
         }
 
         let now = now_ms();
@@ -260,7 +262,9 @@ impl<'a> GroupRepo<'a> {
     pub fn rename(&self, id: i64, name: &str) -> Result<Group, AppError> {
         let name = name.trim();
         if name.is_empty() {
-            return Err(AppError::InvalidInput("group name must not be empty".into()));
+            return Err(AppError::InvalidInput(
+                "group name must not be empty".into(),
+            ));
         }
         let now = now_ms();
         let changed = self.0.execute(
@@ -356,7 +360,9 @@ mod tests {
     fn create_returns_correct_name() {
         let conn = make_db();
         let repo = AccountRepo(&conn);
-        let acc = repo.create(dummy_create("carol")).expect("create must succeed");
+        let acc = repo
+            .create(dummy_create("carol"))
+            .expect("create must succeed");
         assert_eq!(acc.name, "carol");
     }
 
@@ -364,7 +370,9 @@ mod tests {
     fn get_by_id() {
         let conn = make_db();
         let repo = AccountRepo(&conn);
-        let created = repo.create(dummy_create("dave")).expect("create must succeed");
+        let created = repo
+            .create(dummy_create("dave"))
+            .expect("create must succeed");
         let fetched = repo.get(created.id).expect("get must succeed");
         assert_eq!(fetched.id, created.id);
     }
@@ -381,7 +389,9 @@ mod tests {
     fn delete_removes_account() {
         let conn = make_db();
         let repo = AccountRepo(&conn);
-        let acc = repo.create(dummy_create("eve")).expect("create must succeed");
+        let acc = repo
+            .create(dummy_create("eve"))
+            .expect("create must succeed");
         repo.delete(acc.id).expect("delete must succeed");
         assert_eq!(repo.list_with_cipher().expect("list must succeed").len(), 0);
     }
@@ -394,7 +404,10 @@ mod tests {
         let mut inp = dummy_create("frank");
         inp.secret_cipher = cipher.clone();
         let acc = repo.create(inp).expect("create must succeed");
-        assert_eq!(repo.get_secret_cipher(acc.id).expect("cipher fetch"), cipher);
+        assert_eq!(
+            repo.get_secret_cipher(acc.id).expect("cipher fetch"),
+            cipher
+        );
     }
 
     #[test]
@@ -404,7 +417,12 @@ mod tests {
         let a = repo.create(dummy_create("a")).expect("create a");
         let b = repo.create(dummy_create("b")).expect("create b");
         repo.reorder(&[b.id, a.id]).expect("reorder must succeed");
-        let list: Vec<_> = repo.list_with_cipher().expect("list must succeed").into_iter().map(|(acc, _)| acc).collect();
+        let list: Vec<_> = repo
+            .list_with_cipher()
+            .expect("list must succeed")
+            .into_iter()
+            .map(|(acc, _)| acc)
+            .collect();
         assert_eq!(list[0].id, b.id);
         assert_eq!(list[1].id, a.id);
     }
@@ -511,8 +529,12 @@ mod tests {
             })
             .expect("account create must succeed");
 
-        groups.delete(created_group.id).expect("delete must succeed");
-        let fetched = accounts.get(account.id).expect("account fetch must succeed");
+        groups
+            .delete(created_group.id)
+            .expect("delete must succeed");
+        let fetched = accounts
+            .get(account.id)
+            .expect("account fetch must succeed");
         assert_eq!(fetched.group_id, None);
     }
 }

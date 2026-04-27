@@ -6,14 +6,18 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { configureSync, disableSync, getSyncStatus, syncNow, type SyncConfig } from "@/lib/tauri";
+import { configureSync, disableSync, getSyncStatus, type SyncConfig, syncNow } from "@/lib/tauri";
 
 type ProviderMode = "disabled" | "WebDav" | "S3";
 
 export function SyncSettingsPage() {
   const { t } = useTranslation();
   const [provider, setProvider] = useState<ProviderMode>("disabled");
-  const [status, setStatus] = useState<{ lastSync: string | null; lastError: string | null; inProgress: boolean }>({
+  const [status, setStatus] = useState<{
+    lastSync: string | null;
+    lastError: string | null;
+    inProgress: boolean;
+  }>({
     lastSync: null,
     lastError: null,
     inProgress: false,
@@ -198,7 +202,8 @@ export function SyncSettingsPage() {
 
       <div className="rounded-md border p-3 text-sm">
         <p>
-          {t("sync.last_sync")}: {status.lastSync ? new Date(status.lastSync).toLocaleString() : "-"}
+          {t("sync.last_sync")}:{" "}
+          {status.lastSync ? new Date(status.lastSync).toLocaleString() : "-"}
         </p>
         {status.lastError && <p className="text-destructive">{status.lastError}</p>}
         {status.inProgress && (
@@ -215,7 +220,12 @@ export function SyncSettingsPage() {
         <Button type="button" onClick={() => void saveConfig()} disabled={submitting || !canSave}>
           {t("sync.save")}
         </Button>
-        <Button type="button" variant="outline" onClick={() => void runSyncNow()} disabled={submitting}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => void runSyncNow()}
+          disabled={submitting}
+        >
           {t("sync.sync_now")}
         </Button>
       </div>

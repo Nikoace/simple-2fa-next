@@ -123,7 +123,10 @@ describe("tauri.ts wrappers", () => {
 
   it("importS2faFile calls invoke with correct command", async () => {
     await importS2faFile("/tmp/backup.s2fa", "secret");
-    expect(invoke).toHaveBeenCalledWith("import_s2fa_file", { path: "/tmp/backup.s2fa", password: "secret" });
+    expect(invoke).toHaveBeenCalledWith("import_s2fa_file", {
+      path: "/tmp/backup.s2fa",
+      password: "secret",
+    });
   });
 
   it("commitImport calls invoke with correct command", async () => {
@@ -140,11 +143,20 @@ describe("tauri.ts wrappers", () => {
 
   it("exportVaultToFile calls invoke with correct command", async () => {
     await exportVaultToFile("/tmp/export.s2fa", "mypassword");
-    expect(invoke).toHaveBeenCalledWith("export_vault_to_file", { path: "/tmp/export.s2fa", password: "mypassword" });
+    expect(invoke).toHaveBeenCalledWith("export_vault_to_file", {
+      path: "/tmp/export.s2fa",
+      password: "mypassword",
+    });
   });
 
   it("configureSync calls invoke with correct command", async () => {
-    const config = { type: "WebDav" as const, url: "https://dav.example.com", username: "user", password: "pw", remotePath: "/2fa" };
+    const config = {
+      type: "WebDav" as const,
+      url: "https://dav.example.com",
+      username: "user",
+      password: "pw",
+      remotePath: "/2fa",
+    };
     await configureSync(config);
     expect(invoke).toHaveBeenCalledWith("configure_sync", { config });
   });

@@ -60,4 +60,19 @@ describe("DeleteAccountAlert", () => {
 
     expect(tauri.deleteAccount).not.toHaveBeenCalled();
   });
+
+  it("handles deleteAccount error without crashing", async () => {
+    const user = userEvent.setup();
+    vi.mocked(tauri.deleteAccount).mockRejectedValue(new Error("not found"));
+
+    render(<DeleteAccountAlert open account={account} onClose={onClose} />, { wrapper });
+
+    await user.click(screen.getByRole("button", { name: /delete|删除|削除/i }));
+
+    await waitFor(() => {
+      expect(tauri.deleteAccount).toHaveBeenCalledWith(9);
+    });
+    // allow async error path (catch block) to complete
+    await new Promise((r) => setTimeout(r, 50));
+  });
 });

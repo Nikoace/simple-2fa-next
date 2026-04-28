@@ -72,4 +72,82 @@ describe("GroupBar", () => {
 
     await waitFor(() => expect(tauri.createGroup).toHaveBeenCalledWith("School"));
   });
+
+  it("deletes group when confirm returns true", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(globalThis, "confirm").mockReturnValue(true);
+    vi.mocked(tauri.deleteGroup).mockResolvedValue(undefined);
+
+    render(
+      <GroupBar groups={[{ id: 1, name: "Work", sortOrder: 0 }]} selectedGroupId={null} onSelect={vi.fn()} />,
+      { wrapper },
+    );
+
+    await user.click(screen.getAllByLabelText(/group actions|actions|操作/i)[0]);
+    await user.click(screen.getByText(/delete|删除/i));
+
+    await waitFor(() => expect(tauri.deleteGroup).toHaveBeenCalledWith(1));
+  });
+
+  it("does not delete group when confirm returns false", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(globalThis, "confirm").mockReturnValue(false);
+    vi.mocked(tauri.deleteGroup).mockResolvedValue(undefined);
+
+    render(
+      <GroupBar groups={[{ id: 1, name: "Work", sortOrder: 0 }]} selectedGroupId={null} onSelect={vi.fn()} />,
+      { wrapper },
+    );
+
+    await user.click(screen.getAllByLabelText(/group actions|actions|操作/i)[0]);
+    await user.click(screen.getByText(/delete|删除/i));
+
+    await waitFor(() => expect(tauri.deleteGroup).not.toHaveBeenCalled());
+  });
+
+  it("calls onSelect(null) when deleting the currently selected group", async () => {
+    const user = userEvent.setup();
+    const onSelect = vi.fn();
+    vi.spyOn(globalThis, "confirm").mockReturnValue(true);
+    vi.mocked(tauri.deleteGroup).mockResolvedValue(undefined);
+
+    render(
+      <GroupBar groups={[{ id: 1, name: "Work", sortOrder: 0 }]} selectedGroupId={1} onSelect={onSelect} />,
+      { wrapper },
+    );
+
+    await user.click(screen.getAllByLabelText(/group actions|actions|操作/i)[0]);
+    await user.click(screen.getByText(/delete|删除/i));
+
+    await waitFor(() => expect(onSelect).toHaveBeenCalledWith(null));
+  });
+
+  it("closes input on Escape key", async () => {
+    const user = userEvent.setup();
+
+    render(<GroupBar groups={groups} selectedGroupId={null} onSelect={vi.fn()} />, { wrapper });
+
+    await user.click(screen.getByRole("button", { name: /add group|添加分组|グループ追加/i }));
+    const input = screen.getByLabelText(/group name|分组名称|グループ名/i);
+    await user.type(input, "Test");
+    await user.keyboard("{Escape}");
+
+    await waitFor(() => expect(screen.queryByLabelText(/group name|分组名称|グループ名/i)).toBeNull());
+  });
+
+  it("calls renameGroup when prompt returns a new name", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(globalThis, "prompt").mockReturnValue("New Work");
+    vi.mocked(tauri.renameGroup).mockResolvedValue({ id: 1, name: "New Work", sortOrder: 0 });
+
+    render(
+      <GroupBar groups={[{ id: 1, name: "Work", sortOrder: 0 }]} selectedGroupId={null} onSelect={vi.fn()} />,
+      { wrapper },
+    );
+
+    await user.click(screen.getAllByLabelText(/group actions|actions|操作/i)[0]);
+    await user.click(screen.getByText(/rename|重命名/i));
+
+    await waitFor(() => expect(tauri.renameGroup).toHaveBeenCalledWith(1, "New Work"));
+  });
 });

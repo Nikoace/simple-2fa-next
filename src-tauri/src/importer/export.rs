@@ -26,8 +26,7 @@ pub fn export_s2fa(accounts: &[ExportAccount], password: &str) -> Result<Vec<u8>
     OsRng.fill_bytes(&mut nonce);
 
     let key = derive_key(password, &salt)?;
-    let cipher =
-        Aes256Gcm::new_from_slice(&key).map_err(|e| AppError::Crypto(e.to_string()))?;
+    let cipher = Aes256Gcm::new_from_slice(&key).map_err(|e| AppError::Crypto(e.to_string()))?;
     let plaintext = serde_json::to_vec(accounts).map_err(|e| AppError::Import(e.to_string()))?;
     let nonce_ref = Nonce::from_slice(&nonce);
     let ciphertext = cipher

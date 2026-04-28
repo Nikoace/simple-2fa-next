@@ -127,6 +127,7 @@ export function ImportDialog({ open: isOpen, onClose }: Props) {
 
   return (
     <Dialog
+      modal={false}
       open={isOpen}
       onOpenChange={(nextOpen) => {
         if (!nextOpen) {
@@ -162,10 +163,27 @@ export function ImportDialog({ open: isOpen, onClose }: Props) {
           {mode === "file" ? (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <Button type="button" variant="ghost" onClick={() => void chooseFile()}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  aria-label={t("import.choose_file")}
+                  onClick={() => void chooseFile()}
+                >
                   {t("import.choose_file")}
                 </Button>
                 <p className="truncate text-xs text-muted-foreground">{filePath || "-"}</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="import-file-path">{t("import.choose_file")}</Label>
+                <Input
+                  id="import-file-path"
+                  aria-label={t("import.choose_file")}
+                  value={filePath}
+                  onChange={(e) => setFilePath(e.target.value)}
+                  placeholder={t("import.choose_file")}
+                  spellCheck={false}
+                  autoCorrect="off"
+                />
               </div>
               <div className="space-y-2">
                 <Label>{t("export.password")}</Label>

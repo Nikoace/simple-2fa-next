@@ -1,5 +1,5 @@
 use simple_2fa_next_lib::importer::{
-    export::{ExportAccount, export_s2fa},
+    export::{export_s2fa, ExportAccount},
     s2fa::import_s2fa,
 };
 

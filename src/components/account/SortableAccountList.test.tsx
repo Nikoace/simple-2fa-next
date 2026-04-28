@@ -19,7 +19,13 @@ vi.mock("@dnd-kit/core", async () => {
   const actual = await vi.importActual<typeof import("@dnd-kit/core")>("@dnd-kit/core");
   return {
     ...actual,
-    DndContext: ({ onDragEnd, children }: { onDragEnd: (e: import("@dnd-kit/core").DragEndEvent) => void; children: ReactNode }) => {
+    DndContext: ({
+      onDragEnd,
+      children,
+    }: {
+      onDragEnd: (e: import("@dnd-kit/core").DragEndEvent) => void;
+      children: ReactNode;
+    }) => {
       capturedOnDragEnd = onDragEnd;
       return <>{children}</>;
     },
@@ -141,7 +147,10 @@ describe("SortableAccountList", () => {
       </QueryClientProvider>,
     );
     await act(async () => {
-      capturedOnDragEnd!({ active: { id: 1, data: { current: {} } }, over: null } as unknown as DragEndEvent);
+      capturedOnDragEnd?.({
+        active: { id: 1, data: { current: {} } },
+        over: null,
+      } as unknown as DragEndEvent);
     });
     expect(vi.mocked(reorderAccounts)).not.toHaveBeenCalled();
   });
@@ -154,7 +163,7 @@ describe("SortableAccountList", () => {
       </QueryClientProvider>,
     );
     await act(async () => {
-      capturedOnDragEnd!({ active: { id: 1 }, over: { id: 1 } } as unknown as DragEndEvent);
+      capturedOnDragEnd?.({ active: { id: 1 }, over: { id: 1 } } as unknown as DragEndEvent);
     });
     expect(vi.mocked(reorderAccounts)).not.toHaveBeenCalled();
   });
@@ -168,7 +177,7 @@ describe("SortableAccountList", () => {
       </QueryClientProvider>,
     );
     await act(async () => {
-      capturedOnDragEnd!({ active: { id: 1 }, over: { id: 2 } } as unknown as DragEndEvent);
+      capturedOnDragEnd?.({ active: { id: 1 }, over: { id: 2 } } as unknown as DragEndEvent);
     });
     expect(vi.mocked(reorderAccounts)).toHaveBeenCalledWith([2, 1]);
   });
@@ -182,7 +191,7 @@ describe("SortableAccountList", () => {
       </QueryClientProvider>,
     );
     await act(async () => {
-      capturedOnDragEnd!({ active: { id: 1 }, over: { id: 2 } } as unknown as DragEndEvent);
+      capturedOnDragEnd?.({ active: { id: 1 }, over: { id: 2 } } as unknown as DragEndEvent);
     });
     await waitFor(() => {
       const cached = qc.getQueryData<AccountWithCode[]>(["accounts"]);

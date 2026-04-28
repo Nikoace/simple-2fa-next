@@ -1,4 +1,4 @@
-use rand::{rngs::OsRng, RngCore};
+use rand::RngCore;
 use secrecy::SecretBox;
 use tauri::State;
 
@@ -23,7 +23,7 @@ pub fn setup_vault(password: String, state: State<'_, AppState>) -> Result<(), A
         }
 
         let mut salt = [0u8; 16];
-        OsRng.fill_bytes(&mut salt);
+        rand::rng().fill_bytes(&mut salt);
         let salt_hex = hex::encode(salt);
 
         let key = derive_key(&password, &salt)?;

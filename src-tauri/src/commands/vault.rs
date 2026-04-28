@@ -1,5 +1,5 @@
 use rand::{rngs::OsRng, RngCore};
-use secrecy::Secret;
+use secrecy::SecretBox;
 use tauri::State;
 
 use crate::{
@@ -36,8 +36,8 @@ pub fn setup_vault(password: String, state: State<'_, AppState>) -> Result<(), A
     }; // db lock released before vault lock is acquired
 
     *state.vault.lock().expect("vault lock poisoned") = Some(VaultState {
-        key: Secret::new(key),
-        master_password: Secret::new(password),
+        key: SecretBox::new(Box::new(key)),
+        master_password: SecretBox::new(Box::new(password)),
     });
     Ok(())
 }
@@ -63,8 +63,8 @@ pub fn unlock_vault(password: String, state: State<'_, AppState>) -> Result<(), 
     }; // db lock released before vault lock is acquired
 
     *state.vault.lock().expect("vault lock poisoned") = Some(VaultState {
-        key: Secret::new(key),
-        master_password: Secret::new(password),
+        key: SecretBox::new(Box::new(key)),
+        master_password: SecretBox::new(Box::new(password)),
     });
     Ok(())
 }

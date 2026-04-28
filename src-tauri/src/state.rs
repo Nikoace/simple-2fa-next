@@ -1,12 +1,12 @@
 use rusqlite::Connection;
-use secrecy::{ExposeSecret, Secret};
+use secrecy::{ExposeSecret, SecretBox};
 use std::sync::Mutex;
 
 use crate::sync::SyncStatus;
 
 pub struct VaultState {
-    pub key: Secret<[u8; 32]>,
-    pub master_password: Secret<String>,
+    pub key: SecretBox<[u8; 32]>,
+    pub master_password: SecretBox<String>,
 }
 
 impl VaultState {

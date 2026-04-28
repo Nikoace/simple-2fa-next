@@ -6,7 +6,9 @@ const SERVICE: &str = "simple-2fa";
 const USERNAME: &str = "vault-key";
 
 pub fn store_vault_key(key: &[u8]) -> Result<(), AppError> {
-    keyring_entry()?.set_password(&hex::encode(key)).map_err(map_keyring_err)
+    keyring_entry()?
+        .set_password(&hex::encode(key))
+        .map_err(map_keyring_err)
 }
 
 pub fn load_vault_key() -> Result<Vec<u8>, AppError> {
@@ -15,7 +17,9 @@ pub fn load_vault_key() -> Result<Vec<u8>, AppError> {
 }
 
 pub fn delete_vault_key() -> Result<(), AppError> {
-    keyring_entry()?.delete_credential().map_err(map_keyring_err)
+    keyring_entry()?
+        .delete_credential()
+        .map_err(map_keyring_err)
 }
 
 fn keyring_entry() -> Result<Entry, AppError> {

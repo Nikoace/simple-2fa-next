@@ -33,12 +33,15 @@ function SortableItem({ account }: { account: AccountWithCode }) {
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
+      data-testid="account-item"
+      data-account-name={account.name}
       className={`flex items-center gap-1${isDragging ? " opacity-50" : ""}`}
       {...attributes}
     >
       <button
         type="button"
         aria-label={t("accounts.drag_hint")}
+        data-testid="account-drag-handle"
         className="cursor-grab touch-none p-1 text-muted-foreground/50 hover:text-muted-foreground active:cursor-grabbing"
         {...listeners}
       >

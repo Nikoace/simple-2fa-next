@@ -41,6 +41,4 @@ CREATE INDEX IF NOT EXISTS idx_accounts_name
 ";
 
 /// Each migration is applied in order; the index+1 equals the target schema version.
-pub const MIGRATIONS: &[&str] = &[
-    SCHEMA_V1,
-];
+pub const MIGRATIONS: &[&str] = &[SCHEMA_V1];

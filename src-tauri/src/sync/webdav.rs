@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use reqwest::{Method, StatusCode, header};
+use reqwest::{header, Method, StatusCode};
 
 use crate::{error::AppError, sync::SyncProvider};
 
@@ -13,7 +13,11 @@ pub struct WebDavProvider {
 }
 
 impl WebDavProvider {
-    pub fn new(url: impl Into<String>, username: impl Into<String>, password: impl Into<String>) -> Self {
+    pub fn new(
+        url: impl Into<String>,
+        username: impl Into<String>,
+        password: impl Into<String>,
+    ) -> Self {
         Self {
             base_url: url.into().trim_end_matches('/').to_string(),
             username: username.into(),
@@ -37,9 +41,12 @@ impl WebDavProvider {
             return Some(dt.with_timezone(&Utc));
         }
 
-        let without_weekday = value.split_once(',').map(|(_, rhs)| rhs.trim()).unwrap_or(value);
-        let naive = chrono::NaiveDateTime::parse_from_str(without_weekday, "%d %b %Y %H:%M:%S GMT")
-            .ok()?;
+        let without_weekday = value
+            .split_once(',')
+            .map(|(_, rhs)| rhs.trim())
+            .unwrap_or(value);
+        let naive =
+            chrono::NaiveDateTime::parse_from_str(without_weekday, "%d %b %Y %H:%M:%S GMT").ok()?;
         Some(naive.and_utc())
     }
 }
@@ -127,15 +134,18 @@ impl SyncProvider for WebDavProvider {
 #[cfg(test)]
 mod tests {
     use wiremock::{
-        Mock, MockServer, ResponseTemplate,
         matchers::{body_bytes, header, method, path},
+        Mock, MockServer, ResponseTemplate,
     };
 
     use super::*;
 
     fn auth_header(username: &str, password: &str) -> String {
-        use base64::{Engine as _, engine::general_purpose::STANDARD};
-        format!("Basic {}", STANDARD.encode(format!("{username}:{password}")))
+        use base64::{engine::general_purpose::STANDARD, Engine as _};
+        format!(
+            "Basic {}",
+            STANDARD.encode(format!("{username}:{password}"))
+        )
     }
 
     #[tokio::test]

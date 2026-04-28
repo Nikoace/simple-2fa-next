@@ -78,7 +78,11 @@ fn split_label(label: &str) -> Result<(Option<&str>, &str), AppError> {
             return Err(AppError::Import("missing account name in label".into()));
         }
         let issuer = issuer.trim();
-        let issuer = if issuer.is_empty() { None } else { Some(issuer) };
+        let issuer = if issuer.is_empty() {
+            None
+        } else {
+            Some(issuer)
+        };
         Ok((issuer, name))
     } else {
         let name = label.trim();

@@ -34,7 +34,12 @@ export function MainPage() {
         <GroupBar groups={groups} selectedGroupId={selectedGroupId} onSelect={setSelectedGroupId} />
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">{t("accounts.drag_hint")}</p>
-          <Button type="button" size="sm" onClick={() => setAddOpen(true)}>
+          <Button
+            type="button"
+            size="sm"
+            data-testid="open-add-account"
+            onClick={() => setAddOpen(true)}
+          >
             <Plus className="mr-1 size-4" />
             {t("accounts.add")}
           </Button>
@@ -53,7 +58,12 @@ export function MainPage() {
       <GroupBar groups={groups} selectedGroupId={selectedGroupId} onSelect={setSelectedGroupId} />
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">{t("accounts.drag_hint")}</p>
-        <Button type="button" size="sm" onClick={() => setAddOpen(true)}>
+        <Button
+          type="button"
+          size="sm"
+          data-testid="open-add-account"
+          onClick={() => setAddOpen(true)}
+        >
           <Plus className="mr-1 size-4" />
           {t("accounts.add")}
         </Button>

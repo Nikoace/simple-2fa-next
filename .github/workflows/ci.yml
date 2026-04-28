@@ -87,6 +87,36 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
 
+  e2e:
+    name: E2E (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install Linux desktop test deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev libappindicator3-dev \
+            librsvg2-dev patchelf \
+            webkit2gtk-driver xvfb
+
+      - name: Install deps
+        run: bun install --frozen-lockfile
+
+      - name: Install tauri-driver
+        run: cargo install tauri-driver --locked
+
+      - name: Run desktop E2E
+        run: xvfb-run -a bun run test:e2e
+
   build-check:
     name: Frontend build
     runs-on: ubuntu-latest

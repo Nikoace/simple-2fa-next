@@ -16,6 +16,7 @@
       "!src-tauri",
       "!tests/fixtures",
       "!dist",
+      "!coverage",
       "!node_modules"
     ]
   },

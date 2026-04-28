@@ -30,11 +30,11 @@ vi.mock("@/components/import/ImportDialog", () => ({
     open ? <div data-testid="import-dialog-open" /> : null,
 }));
 
+import { useNavigate } from "@tanstack/react-router";
 import type { StoreApi, UseBoundStore } from "zustand";
 import * as tauri from "@/lib/tauri";
 import * as settingsStore from "@/stores/settings";
 import * as vaultStore from "@/stores/vault";
-import { useNavigate } from "@tanstack/react-router";
 import { AppShell } from "./AppShell";
 
 type VaultStatus = "loading" | "uninitialized" | "locked" | "unlocked" | "error";

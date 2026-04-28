@@ -79,7 +79,11 @@ describe("GroupBar", () => {
     vi.mocked(tauri.deleteGroup).mockResolvedValue(undefined);
 
     render(
-      <GroupBar groups={[{ id: 1, name: "Work", sortOrder: 0 }]} selectedGroupId={null} onSelect={vi.fn()} />,
+      <GroupBar
+        groups={[{ id: 1, name: "Work", sortOrder: 0 }]}
+        selectedGroupId={null}
+        onSelect={vi.fn()}
+      />,
       { wrapper },
     );
 
@@ -95,7 +99,11 @@ describe("GroupBar", () => {
     vi.mocked(tauri.deleteGroup).mockResolvedValue(undefined);
 
     render(
-      <GroupBar groups={[{ id: 1, name: "Work", sortOrder: 0 }]} selectedGroupId={null} onSelect={vi.fn()} />,
+      <GroupBar
+        groups={[{ id: 1, name: "Work", sortOrder: 0 }]}
+        selectedGroupId={null}
+        onSelect={vi.fn()}
+      />,
       { wrapper },
     );
 
@@ -112,7 +120,11 @@ describe("GroupBar", () => {
     vi.mocked(tauri.deleteGroup).mockResolvedValue(undefined);
 
     render(
-      <GroupBar groups={[{ id: 1, name: "Work", sortOrder: 0 }]} selectedGroupId={1} onSelect={onSelect} />,
+      <GroupBar
+        groups={[{ id: 1, name: "Work", sortOrder: 0 }]}
+        selectedGroupId={1}
+        onSelect={onSelect}
+      />,
       { wrapper },
     );
 
@@ -132,7 +144,9 @@ describe("GroupBar", () => {
     await user.type(input, "Test");
     await user.keyboard("{Escape}");
 
-    await waitFor(() => expect(screen.queryByLabelText(/group name|分组名称|グループ名/i)).toBeNull());
+    await waitFor(() =>
+      expect(screen.queryByLabelText(/group name|分组名称|グループ名/i)).toBeNull(),
+    );
   });
 
   it("calls renameGroup when prompt returns a new name", async () => {
@@ -141,7 +155,11 @@ describe("GroupBar", () => {
     vi.mocked(tauri.renameGroup).mockResolvedValue({ id: 1, name: "New Work", sortOrder: 0 });
 
     render(
-      <GroupBar groups={[{ id: 1, name: "Work", sortOrder: 0 }]} selectedGroupId={null} onSelect={vi.fn()} />,
+      <GroupBar
+        groups={[{ id: 1, name: "Work", sortOrder: 0 }]}
+        selectedGroupId={null}
+        onSelect={vi.fn()}
+      />,
       { wrapper },
     );
 

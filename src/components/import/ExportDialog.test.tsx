@@ -50,10 +50,7 @@ describe("ExportDialog", () => {
       screen.getByLabelText(/export password|导出密码|エクスポート用パスワード/i),
       "abc",
     );
-    await user.type(
-      screen.getByLabelText(/confirm password|确认密码|確認用パスワード/i),
-      "xyz",
-    );
+    await user.type(screen.getByLabelText(/confirm password|确认密码|確認用パスワード/i), "xyz");
     await user.click(screen.getByRole("button", { name: /export|导出|エクスポート/i }));
 
     await waitFor(() => {

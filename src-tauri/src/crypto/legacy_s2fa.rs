@@ -46,8 +46,8 @@ pub fn decrypt_v1(data: &[u8], password: &str) -> Result<Vec<ExportAccountV1>, A
 
 /// Argon2id KDF for v1 format. FROZEN — do not sync with `crypto::kdf::derive_key`.
 fn derive_v1_key(password: &str, salt: &[u8]) -> Result<[u8; 32], AppError> {
-    let params =
-        Params::new(65_536, 3, 4, Some(32)).map_err(|_| AppError::Crypto("argon2 params".into()))?;
+    let params = Params::new(65_536, 3, 4, Some(32))
+        .map_err(|_| AppError::Crypto("argon2 params".into()))?;
     let argon2 = Argon2::new(argon2::Algorithm::Argon2id, Version::V0x13, params);
     let mut key = [0u8; 32];
     argon2
@@ -69,7 +69,9 @@ mod tests {
         let pt = serde_json::to_vec(accounts).expect("json encode must succeed");
         let cipher = Aes256Gcm::new_from_slice(&key).expect("aes init must succeed");
         let nonce = Nonce::from_slice(&nonce_b);
-        let ct = cipher.encrypt(nonce, pt.as_ref()).expect("encrypt must succeed");
+        let ct = cipher
+            .encrypt(nonce, pt.as_ref())
+            .expect("encrypt must succeed");
         let mut out = b"S2FA_ENC".to_vec();
         out.extend_from_slice(&salt);
         out.extend_from_slice(&nonce_b);

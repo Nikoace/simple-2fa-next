@@ -7,8 +7,8 @@ use crate::error::AppError;
 /// `crypto::legacy_s2fa::derive_v1_key` for the frozen v1 path — do not
 /// keep these two in sync. Vault KDF parameters may be strengthened independently.
 pub fn derive_key(password: &str, salt: &[u8]) -> Result<[u8; 32], AppError> {
-    let params = Params::new(65_536, 3, 4, Some(32))
-        .map_err(|_| AppError::Crypto("kdf params".into()))?;
+    let params =
+        Params::new(65_536, 3, 4, Some(32)).map_err(|_| AppError::Crypto("kdf params".into()))?;
     let argon2 = Argon2::new(argon2::Algorithm::Argon2id, Version::V0x13, params);
     let mut key = [0u8; 32];
     argon2

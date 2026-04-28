@@ -35,6 +35,7 @@ export function SetupPage() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          aria-label={t("vault.password_placeholder")}
           placeholder={t("vault.password_placeholder")}
           autoFocus
         />

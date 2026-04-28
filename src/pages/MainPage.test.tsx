@@ -109,6 +109,52 @@ describe("MainPage", () => {
     });
   });
 
+  it("shows error state", async () => {
+    vi.mocked(tauri.listGroups).mockResolvedValue([]);
+    vi.mocked(tauri.getAccounts).mockRejectedValue(new Error("network error"));
+    renderWithQuery(<MainPage />);
+    await waitFor(() => {
+      expect(screen.getByText(/something went wrong|出错了/i)).toBeTruthy();
+    });
+  });
+
+  it("shows empty group message when filtered accounts is empty", async () => {
+    vi.mocked(tauri.listGroups).mockResolvedValue([
+      { id: 1, name: "Work", sortOrder: 0 },
+      { id: 2, name: "Personal", sortOrder: 1 },
+    ]);
+    vi.mocked(tauri.getAccounts).mockResolvedValue([
+      {
+        id: 1,
+        name: "GitHub",
+        issuer: "GitHub",
+        algorithm: "SHA1",
+        digits: 6,
+        period: 30,
+        groupId: 1,
+        icon: null,
+        color: null,
+        sortOrder: 0,
+        code: "123456",
+        ttl: 15,
+        progress: 0.5,
+      },
+    ]);
+
+    const user = userEvent.setup();
+    renderWithQuery(<MainPage />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Personal" })).toBeTruthy();
+    });
+
+    await user.click(screen.getByRole("button", { name: "Personal" }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/no accounts in this group|该分组下暂无账户/i)).toBeTruthy();
+    });
+  });
+
   it("renders account cards", async () => {
     vi.mocked(tauri.listGroups).mockResolvedValue([]);
     vi.mocked(tauri.getAccounts).mockResolvedValue([

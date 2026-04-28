@@ -48,4 +48,10 @@ describe("useSettingsStore", () => {
     useSettingsStore.getState().setBiometricEnabled(true);
     expect(useSettingsStore.getState().biometricEnabled).toBe(true);
   });
+
+  it("setTheme updates theme and applies it", () => {
+    useSettingsStore.getState().setTheme("dark");
+    expect(useSettingsStore.getState().theme).toBe("dark");
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
+  });
 });

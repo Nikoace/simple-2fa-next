@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use data_encoding::BASE32_NOPAD;
+use data_encoding::{BASE32_NOPAD, BASE64};
 use secrecy::ExposeSecret;
 use tauri::{Emitter, State};
 use zeroize::Zeroize;
@@ -8,14 +8,14 @@ use crate::{
     crypto::{open, seal},
     db::repo::{AccountRepo, CreateAccount},
     error::AppError,
-    importer::{export::ExportAccount, export::export_s2fa, import_s2fa},
+    importer::{export::export_s2fa, export::ExportAccount, import_s2fa},
     state::AppState,
-    sync::{SyncConfig, SyncStatus, sync_vault},
+    sync::{sync_vault, SyncConfig, SyncStatus},
 };
 
+use super::vault::{get_meta, set_meta};
 use crate::sync::s3::S3Provider;
 use crate::sync::webdav::WebDavProvider;
-use super::vault::{get_meta, set_meta};
 
 const META_SYNC_CONFIG: &str = "sync_config";
 const REMOTE_FILE: &str = "vault.s2fa";
@@ -27,7 +27,7 @@ pub fn configure_sync(config: SyncConfig, state: State<'_, AppState>) -> Result<
 
     let raw = serde_json::to_vec(&config).map_err(|e| AppError::Sync(e.to_string()))?;
     let encrypted = seal(vault_key, &raw)?;
-    let encoded = hex::encode(encrypted);
+    let encoded = BASE64.encode(&encrypted);
 
     let db = state.db.lock().expect("db lock poisoned");
     set_meta(&db, META_SYNC_CONFIG, &encoded)
@@ -38,35 +38,46 @@ pub async fn sync_now(
     app: tauri::AppHandle,
     state: State<'_, AppState>,
 ) -> Result<SyncStatus, AppError> {
+    // Emit in_progress; drop guard explicitly before any async work to avoid
+    // blocking the executor thread while holding a std::sync::Mutex.
     {
         let mut status = state.sync_status.lock().expect("sync status lock poisoned");
         status.in_progress = true;
         status.last_error = None;
-        app.emit("sync://status-changed", &*status)
+        let snapshot = status.clone();
+        drop(status);
+        app.emit("sync://status-changed", &snapshot)
             .map_err(|e| AppError::Sync(e.to_string()))?;
     }
 
     let sync_result = sync_now_inner(&state).await;
 
-    let mut status = state.sync_status.lock().expect("sync status lock poisoned");
-    status.in_progress = false;
+    // Update final status; preserve the original AppError so its variant is
+    // returned unchanged (avoids downcasting SyncAuthFailed → Sync(string)).
+    let (out, sync_error) = {
+        let mut status = state.sync_status.lock().expect("sync status lock poisoned");
+        status.in_progress = false;
+        let sync_error = match sync_result {
+            Ok(()) => {
+                status.last_sync = Some(Utc::now());
+                status.last_error = None;
+                None
+            }
+            Err(err) => {
+                status.last_error = Some(err.to_string());
+                Some(err)
+            }
+        };
+        let out = status.clone();
+        drop(status);
+        (out, sync_error)
+    };
 
-    match sync_result {
-        Ok(()) => {
-            status.last_sync = Some(Utc::now());
-            status.last_error = None;
-        }
-        Err(err) => {
-            status.last_error = Some(err.to_string());
-        }
-    }
-
-    let out = status.clone();
     app.emit("sync://status-changed", &out)
         .map_err(|e| AppError::Sync(e.to_string()))?;
 
-    if let Some(msg) = &status.last_error {
-        return Err(AppError::Sync(msg.clone()));
+    if let Some(err) = sync_error {
+        return Err(err);
     }
 
     Ok(out)
@@ -153,9 +164,13 @@ fn load_sync_config(state: &AppState) -> Result<SyncConfig, AppError> {
     let encoded = get_meta(&db, META_SYNC_CONFIG)?
         .ok_or_else(|| AppError::InvalidInput("sync not configured".into()))?;
 
-    let bytes = hex::decode(encoded).map_err(|e| AppError::Sync(e.to_string()))?;
-    let plaintext = open(vault_key, &bytes)?;
-    serde_json::from_slice(&plaintext).map_err(|e| AppError::Sync(e.to_string()))
+    let bytes = BASE64
+        .decode(encoded.as_bytes())
+        .map_err(|e| AppError::Sync(e.to_string()))?;
+    let mut plaintext = open(vault_key, &bytes)?;
+    let config = serde_json::from_slice(&plaintext).map_err(|e| AppError::Sync(e.to_string()));
+    plaintext.zeroize();
+    config
 }
 
 fn export_local_vault(state: &AppState) -> Result<Vec<u8>, AppError> {
@@ -203,6 +218,8 @@ fn import_remote_vault(state: &AppState, bytes: &[u8]) -> Result<(), AppError> {
         ));
     }
 
+    // Parse and validate the remote vault before touching the local DB.
+    // If this fails, existing accounts are left intact.
     let preview = import_s2fa(bytes, password)?;
 
     let mut db = state.db.lock().expect("db lock poisoned");
@@ -235,7 +252,8 @@ fn import_remote_vault(state: &AppState, bytes: &[u8]) -> Result<(), AppError> {
 
 fn get_local_last_modified(state: &AppState) -> Result<Option<DateTime<Utc>>, AppError> {
     let db = state.db.lock().expect("db lock poisoned");
-    let last: Option<i64> = db.query_row("SELECT MAX(updated_at) FROM accounts", [], |r| r.get(0))?;
+    let last: Option<i64> =
+        db.query_row("SELECT MAX(updated_at) FROM accounts", [], |r| r.get(0))?;
 
     Ok(last.and_then(DateTime::<Utc>::from_timestamp_millis))
 }
@@ -252,7 +270,7 @@ mod tests {
         sync::SyncConfig,
     };
 
-    use super::{META_SYNC_CONFIG, load_sync_config};
+    use super::{import_remote_vault, load_sync_config, set_meta, META_SYNC_CONFIG};
 
     fn make_state_with_password(password: &str) -> AppState {
         let mut conn = Connection::open_in_memory().expect("in-memory db");
@@ -298,17 +316,22 @@ mod tests {
 
         let raw = serde_json::to_vec(&config).expect("serialize");
         let encrypted = crate::crypto::seal(vault_key, &raw).expect("seal");
-        let encoded = hex::encode(encrypted);
+        let encoded = data_encoding::BASE64.encode(&encrypted);
         drop(vault);
 
         {
             let db = state.db.lock().expect("db");
-            super::set_meta(&db, META_SYNC_CONFIG, &encoded).expect("set_meta");
+            set_meta(&db, META_SYNC_CONFIG, &encoded).expect("set_meta");
         }
 
         let loaded = load_sync_config(&state).expect("load");
         match loaded {
-            SyncConfig::WebDav { url, username, remote_path, .. } => {
+            SyncConfig::WebDav {
+                url,
+                username,
+                remote_path,
+                ..
+            } => {
                 assert_eq!(url, "https://dav.example.com");
                 assert_eq!(username, "alice");
                 assert_eq!(remote_path, "vault.s2fa");
@@ -326,8 +349,14 @@ mod tests {
             remote_path: "r".into(),
         };
         let json = serde_json::to_value(&config).expect("serialize");
-        assert!(json.get("remotePath").is_some(), "remotePath key must be present");
-        assert!(json.get("remote_path").is_none(), "snake_case key must not appear");
+        assert!(
+            json.get("remotePath").is_some(),
+            "remotePath key must be present"
+        );
+        assert!(
+            json.get("remote_path").is_none(),
+            "snake_case key must not appear"
+        );
 
         let config = SyncConfig::S3 {
             bucket: "b".into(),
@@ -337,9 +366,18 @@ mod tests {
             secret_key: "sk".into(),
         };
         let json = serde_json::to_value(&config).expect("serialize");
-        assert!(json.get("accessKey").is_some(), "accessKey key must be present");
-        assert!(json.get("secretKey").is_some(), "secretKey key must be present");
-        assert!(json.get("access_key").is_none(), "snake_case key must not appear");
+        assert!(
+            json.get("accessKey").is_some(),
+            "accessKey key must be present"
+        );
+        assert!(
+            json.get("secretKey").is_some(),
+            "secretKey key must be present"
+        );
+        assert!(
+            json.get("access_key").is_none(),
+            "snake_case key must not appear"
+        );
     }
 
     #[test]
@@ -354,11 +392,42 @@ mod tests {
         let json = r#"{"type":"S3","bucket":"b","prefix":"p","region":"r","accessKey":"ak","secretKey":"sk"}"#;
         let config: SyncConfig = serde_json::from_str(json).expect("deserialize");
         match config {
-            SyncConfig::S3 { access_key, secret_key, .. } => {
+            SyncConfig::S3 {
+                access_key,
+                secret_key,
+                ..
+            } => {
                 assert_eq!(access_key, "ak");
                 assert_eq!(secret_key, "sk");
             }
             _ => panic!("expected S3"),
         }
+    }
+
+    #[test]
+    fn import_with_corrupt_bytes_preserves_existing_accounts() {
+        let state = make_state_with_password("pw");
+
+        // Seed one row so we can assert it survives a failed import.
+        {
+            let db = state.db.lock().expect("db");
+            db.execute(
+                "INSERT INTO accounts (name, secret_cipher, sort_order, created_at, updated_at) \
+                 VALUES (?1, ?2, ?3, ?4, ?5)",
+                rusqlite::params!["Test", vec![0u8; 48], 0i32, 0i64, 0i64],
+            )
+            .expect("seed account");
+        }
+
+        let err = import_remote_vault(&state, b"not a valid s2fa file")
+            .expect_err("import of corrupt bytes must fail");
+        assert!(!err.to_string().is_empty());
+
+        let count: i64 = {
+            let db = state.db.lock().expect("db");
+            db.query_row("SELECT COUNT(*) FROM accounts", [], |r| r.get(0))
+                .expect("count")
+        };
+        assert_eq!(count, 1, "existing account must survive a failed import");
     }
 }

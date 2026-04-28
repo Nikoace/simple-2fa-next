@@ -10,8 +10,8 @@ use crate::{
     db::repo::{Account, AccountRepo, CreateAccount},
     error::AppError,
     importer::{
-        ImportAccountItem, ImportPreview, export::ExportAccount, export::export_s2fa,
-        import_s2fa, parse_otpauth_uri,
+        export::export_s2fa, export::ExportAccount, import_s2fa, parse_otpauth_uri,
+        ImportAccountItem, ImportPreview,
     },
     state::AppState,
     totp::secret::{decode_base32_lenient, generate},

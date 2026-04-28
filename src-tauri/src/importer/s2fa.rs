@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     crypto::derive_key,
-    crypto::legacy_s2fa::{ExportAccountV1, decrypt_v1},
+    crypto::legacy_s2fa::{decrypt_v1, ExportAccountV1},
     error::AppError,
     totp::secret::{decode_base32_lenient, normalize_secret},
 };
@@ -141,7 +141,9 @@ mod tests {
         let pt = serde_json::to_vec(accounts).expect("json encode must succeed");
         let cipher = Aes256Gcm::new_from_slice(&key).expect("aes init must succeed");
         let nonce = Nonce::from_slice(&nonce_b);
-        let ct = cipher.encrypt(nonce, pt.as_ref()).expect("encrypt must succeed");
+        let ct = cipher
+            .encrypt(nonce, pt.as_ref())
+            .expect("encrypt must succeed");
         let mut out = b"S2FA_ENC".to_vec();
         out.extend_from_slice(&salt);
         out.extend_from_slice(&nonce_b);

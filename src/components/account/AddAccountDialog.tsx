@@ -192,10 +192,19 @@ export function AddAccountDialog({ open, onClose }: Props) {
 
           {submitError && <p className="text-sm text-destructive">{submitError}</p>}
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="ghost" onClick={onClose}>
+            <Button
+              type="button"
+              variant="ghost"
+              data-testid="cancel-add-account"
+              onClick={onClose}
+            >
               {t("accounts.cancel")}
             </Button>
-            <Button type="submit" disabled={!isValid || isSubmitting}>
+            <Button
+              type="submit"
+              data-testid="submit-add-account"
+              disabled={!isValid || isSubmitting}
+            >
               {t("accounts.add")}
             </Button>
           </div>

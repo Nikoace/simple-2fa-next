@@ -11,9 +11,8 @@ vi.mock("@/lib/tauri", () => ({
 }));
 
 vi.mock("@tanstack/react-router", async () => {
-  const actual = await vi.importActual<typeof import("@tanstack/react-router")>(
-    "@tanstack/react-router",
-  );
+  const actual =
+    await vi.importActual<typeof import("@tanstack/react-router")>("@tanstack/react-router");
   return {
     ...actual,
     Link: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -51,7 +50,10 @@ describe("SyncSettingsPage", () => {
     render(<SyncSettingsPage />);
 
     await user.selectOptions(screen.getByLabelText(/provider|同步方式|プロバイダー/i), "WebDav");
-    await user.type(screen.getByLabelText(/webdav url|webdav 地址|webdav url/i), "https://dav.example.com");
+    await user.type(
+      screen.getByLabelText(/webdav url|webdav 地址|webdav url/i),
+      "https://dav.example.com",
+    );
     await user.type(
       screen.getByLabelText(/webdav username|webdav 用户名|webdav ユーザー名/i),
       "alice",

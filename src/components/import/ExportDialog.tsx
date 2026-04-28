@@ -61,6 +61,7 @@ export function ExportDialog({ open, onClose }: Props) {
 
   return (
     <Dialog
+      modal={false}
       open={open}
       onOpenChange={(nextOpen) => {
         if (!nextOpen) {

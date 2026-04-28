@@ -50,6 +50,8 @@ export function AccountCard({ account, className }: Props) {
 
   return (
     <Card
+      data-testid="account-card"
+      data-account-name={account.name}
       className={cn(
         "relative flex items-center gap-4 p-4 transition-colors hover:bg-muted/50",
         className,
@@ -67,6 +69,7 @@ export function AccountCard({ account, className }: Props) {
       <button
         type="button"
         aria-label="copy"
+        data-testid="copy-code-button"
         onClick={() => void handleCopy()}
         className={cn("text-right transition-colors", isDanger && "text-destructive")}
       >
@@ -77,7 +80,7 @@ export function AccountCard({ account, className }: Props) {
       </button>
 
       <DropdownMenu>
-        <DropdownMenuTrigger aria-label="options">
+        <DropdownMenuTrigger aria-label="options" data-testid="account-options-trigger">
           <span className="rounded p-1 text-muted-foreground hover:bg-muted">
             <MoreVertical className="size-4" />
           </span>

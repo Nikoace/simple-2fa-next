@@ -27,10 +27,10 @@ vi.mock("@/components/import/ImportDialog", () => ({
   ImportDialog: () => null,
 }));
 
-import * as tauri from "@/lib/tauri";
-import * as vaultStore from "@/stores/vault";
 import type { StoreApi, UseBoundStore } from "zustand";
+import * as tauri from "@/lib/tauri";
 import * as settingsStore from "@/stores/settings";
+import * as vaultStore from "@/stores/vault";
 import { AppShell } from "./AppShell";
 
 type VaultStatus = "loading" | "uninitialized" | "locked" | "unlocked" | "error";
@@ -38,8 +38,30 @@ type VaultStatus = "loading" | "uninitialized" | "locked" | "unlocked" | "error"
 function mockVaultStatus(status: VaultStatus) {
   const noop = async () => {};
   vi.mocked(vaultStore.useVaultStore).mockImplementation(
-    (selector: Parameters<UseBoundStore<StoreApi<{ status: VaultStatus; lock: () => Promise<void>; error: string | null; checkStatus: () => Promise<void>; setup: () => Promise<void>; unlock: () => Promise<void>; unlockByBiometric: () => Promise<void> }>>>[0]) =>
-      selector({ status, lock: noop, error: null, checkStatus: noop, setup: noop, unlock: noop, unlockByBiometric: noop }),
+    (
+      selector: Parameters<
+        UseBoundStore<
+          StoreApi<{
+            status: VaultStatus;
+            lock: () => Promise<void>;
+            error: string | null;
+            checkStatus: () => Promise<void>;
+            setup: () => Promise<void>;
+            unlock: () => Promise<void>;
+            unlockByBiometric: () => Promise<void>;
+          }>
+        >
+      >[0],
+    ) =>
+      selector({
+        status,
+        lock: noop,
+        error: null,
+        checkStatus: noop,
+        setup: noop,
+        unlock: noop,
+        unlockByBiometric: noop,
+      }),
   );
 }
 

@@ -4,8 +4,8 @@ pub mod crypto;
 mod db;
 mod error;
 pub mod importer;
-pub mod sync;
 mod state;
+pub mod sync;
 pub mod totp;
 
 use db::migrate::run_migrations;
@@ -26,8 +26,7 @@ pub fn run() {
             std::fs::create_dir_all(&app_dir)?;
             let db_path = app_dir.join("accounts.db");
 
-            let mut conn =
-                rusqlite::Connection::open(&db_path).expect("failed to open database");
+            let mut conn = rusqlite::Connection::open(&db_path).expect("failed to open database");
             conn.execute_batch("PRAGMA foreign_keys = ON")
                 .expect("failed to enable foreign keys");
             run_migrations(&mut conn).expect("migration failed");

@@ -103,8 +103,14 @@ describe("SyncSettingsPage", () => {
     await user.type(screen.getByLabelText(/S3 Prefix|S3 前缀|S3プレフィックス/i), "vault/");
     await user.clear(screen.getByLabelText(/S3 Region|S3 区域|S3リージョン/i));
     await user.type(screen.getByLabelText(/S3 Region|S3 区域|S3リージョン/i), "us-west-2");
-    await user.type(screen.getByLabelText(/S3 Access Key|S3 访问密钥|S3アクセスキー/i), "AKIAIOSFODNN7");
-    await user.type(screen.getByLabelText(/S3 Secret Key|S3 私有密钥|S3シークレットキー/i), "wJalrXUtnFEMI");
+    await user.type(
+      screen.getByLabelText(/S3 Access Key|S3 访问密钥|S3アクセスキー/i),
+      "AKIAIOSFODNN7",
+    );
+    await user.type(
+      screen.getByLabelText(/S3 Secret Key|S3 私有密钥|S3シークレットキー/i),
+      "wJalrXUtnFEMI",
+    );
 
     await user.click(screen.getByRole("button", { name: /^Save$|^保存$/i }));
 
@@ -137,7 +143,10 @@ describe("SyncSettingsPage", () => {
     vi.mocked(tauri.configureSync).mockRejectedValue(new Error("network"));
     render(<SyncSettingsPage />);
 
-    await user.selectOptions(screen.getByLabelText(/^Provider$|^同步方式$|^プロバイダー$/i), "WebDav");
+    await user.selectOptions(
+      screen.getByLabelText(/^Provider$|^同步方式$|^プロバイダー$/i),
+      "WebDav",
+    );
     await user.type(
       screen.getByLabelText(/webdav url|webdav 地址|webdav url/i),
       "https://dav.example.com",

@@ -91,4 +91,78 @@ describe("SyncSettingsPage", () => {
       expect(screen.getByText(/2026/)).toBeTruthy();
     });
   });
+
+  it("submits S3 config", async () => {
+    const user = userEvent.setup();
+    vi.mocked(tauri.configureSync).mockResolvedValue(undefined);
+    render(<SyncSettingsPage />);
+
+    await user.selectOptions(screen.getByLabelText(/^Provider$|^同步方式$|^プロバイダー$/i), "S3");
+
+    await user.type(screen.getByLabelText(/S3 Bucket|S3 桶|S3バケット/i), "my-bucket");
+    await user.type(screen.getByLabelText(/S3 Prefix|S3 前缀|S3プレフィックス/i), "vault/");
+    await user.clear(screen.getByLabelText(/S3 Region|S3 区域|S3リージョン/i));
+    await user.type(screen.getByLabelText(/S3 Region|S3 区域|S3リージョン/i), "us-west-2");
+    await user.type(screen.getByLabelText(/S3 Access Key|S3 访问密钥|S3アクセスキー/i), "AKIAIOSFODNN7");
+    await user.type(screen.getByLabelText(/S3 Secret Key|S3 私有密钥|S3シークレットキー/i), "wJalrXUtnFEMI");
+
+    await user.click(screen.getByRole("button", { name: /^Save$|^保存$/i }));
+
+    await waitFor(() => {
+      expect(tauri.configureSync).toHaveBeenCalledWith({
+        type: "S3",
+        bucket: "my-bucket",
+        prefix: "vault/",
+        region: "us-west-2",
+        accessKey: "AKIAIOSFODNN7",
+        secretKey: "wJalrXUtnFEMI",
+      });
+    });
+  });
+
+  it("disables sync when provider is disabled", async () => {
+    const user = userEvent.setup();
+    vi.mocked(tauri.disableSync).mockResolvedValue(undefined);
+    render(<SyncSettingsPage />);
+
+    await user.click(screen.getByRole("button", { name: /^Save$|^保存$/i }));
+
+    await waitFor(() => {
+      expect(tauri.disableSync).toHaveBeenCalled();
+    });
+  });
+
+  it("shows error when configureSync fails", async () => {
+    const user = userEvent.setup();
+    vi.mocked(tauri.configureSync).mockRejectedValue(new Error("network"));
+    render(<SyncSettingsPage />);
+
+    await user.selectOptions(screen.getByLabelText(/^Provider$|^同步方式$|^プロバイダー$/i), "WebDav");
+    await user.type(
+      screen.getByLabelText(/webdav url|webdav 地址|webdav url/i),
+      "https://dav.example.com",
+    );
+    await user.type(
+      screen.getByLabelText(/webdav username|webdav 用户名|webdav ユーザー名/i),
+      "alice",
+    );
+    await user.type(screen.getByLabelText(/webdav password|webdav 密码|webdav パスワード/i), "pw");
+
+    await user.click(screen.getByRole("button", { name: /^Save$|^保存$/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/error|失败|操作|エラー|失敗/i)).toBeTruthy();
+    });
+  });
+
+  it("disables save button when S3 fields are incomplete", async () => {
+    const user = userEvent.setup();
+    render(<SyncSettingsPage />);
+
+    await user.selectOptions(screen.getByLabelText(/^Provider$|^同步方式$|^プロバイダー$/i), "S3");
+    await user.type(screen.getByLabelText(/S3 Bucket|S3 桶|S3バケット/i), "my-bucket");
+
+    const saveBtn = screen.getByRole("button", { name: /^Save$|^保存$/i });
+    expect(saveBtn).toBeDisabled();
+  });
 });

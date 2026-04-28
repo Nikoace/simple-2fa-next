@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -13,6 +13,20 @@ vi.mock("framer-motion", () => ({
   AnimatePresence: ({ children }: { children: ReactNode }) => <>{children}</>,
 }));
 
+let capturedOnDragEnd: ((event: import("@dnd-kit/core").DragEndEvent) => void) | undefined;
+
+vi.mock("@dnd-kit/core", async () => {
+  const actual = await vi.importActual<typeof import("@dnd-kit/core")>("@dnd-kit/core");
+  return {
+    ...actual,
+    DndContext: ({ onDragEnd, children }: { onDragEnd: (e: import("@dnd-kit/core").DragEndEvent) => void; children: ReactNode }) => {
+      capturedOnDragEnd = onDragEnd;
+      return <>{children}</>;
+    },
+  };
+});
+
+import type { DragEndEvent } from "@dnd-kit/core";
 import type { AccountWithCode } from "@/lib/tauri";
 import { reorderAccounts } from "@/lib/tauri";
 import { SortableAccountList } from "./SortableAccountList";
@@ -60,6 +74,7 @@ function makeQc(initialData?: AccountWithCode[]) {
 
 beforeEach(() => {
   vi.mocked(reorderAccounts).mockReset();
+  capturedOnDragEnd = undefined;
 });
 
 describe("SortableAccountList", () => {
@@ -116,5 +131,63 @@ describe("SortableAccountList", () => {
     // Each item should have a drag handle button
     const handles = screen.getAllByRole("button", { name: /drag|拖拽|ドラッグ/i });
     expect(handles.length).toBeGreaterThanOrEqual(accounts.length);
+  });
+
+  it("handleDragEnd: no-op when over is null", async () => {
+    const qc = makeQc([...accounts]);
+    render(
+      <QueryClientProvider client={qc}>
+        <SortableAccountList accounts={accounts} />
+      </QueryClientProvider>,
+    );
+    await act(async () => {
+      capturedOnDragEnd!({ active: { id: 1, data: { current: {} } }, over: null } as unknown as DragEndEvent);
+    });
+    expect(vi.mocked(reorderAccounts)).not.toHaveBeenCalled();
+  });
+
+  it("handleDragEnd: no-op when active.id === over.id", async () => {
+    const qc = makeQc([...accounts]);
+    render(
+      <QueryClientProvider client={qc}>
+        <SortableAccountList accounts={accounts} />
+      </QueryClientProvider>,
+    );
+    await act(async () => {
+      capturedOnDragEnd!({ active: { id: 1 }, over: { id: 1 } } as unknown as DragEndEvent);
+    });
+    expect(vi.mocked(reorderAccounts)).not.toHaveBeenCalled();
+  });
+
+  it("handleDragEnd: calls reorderAccounts with new order", async () => {
+    vi.mocked(reorderAccounts).mockResolvedValue(undefined);
+    const qc = makeQc([...accounts]);
+    render(
+      <QueryClientProvider client={qc}>
+        <SortableAccountList accounts={accounts} />
+      </QueryClientProvider>,
+    );
+    await act(async () => {
+      capturedOnDragEnd!({ active: { id: 1 }, over: { id: 2 } } as unknown as DragEndEvent);
+    });
+    expect(vi.mocked(reorderAccounts)).toHaveBeenCalledWith([2, 1]);
+  });
+
+  it("handleDragEnd: rolls back queryClient on error", async () => {
+    vi.mocked(reorderAccounts).mockRejectedValue(new Error("err"));
+    const qc = makeQc([...accounts]);
+    render(
+      <QueryClientProvider client={qc}>
+        <SortableAccountList accounts={accounts} />
+      </QueryClientProvider>,
+    );
+    await act(async () => {
+      capturedOnDragEnd!({ active: { id: 1 }, over: { id: 2 } } as unknown as DragEndEvent);
+    });
+    await waitFor(() => {
+      const cached = qc.getQueryData<AccountWithCode[]>(["accounts"]);
+      const ids = cached?.map((a) => a.id);
+      expect(ids).toEqual([1, 2]);
+    });
   });
 });

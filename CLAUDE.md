@@ -123,7 +123,7 @@ cd src-tauri && cargo fmt
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **simple-2fa-next** (626 symbols, 1436 relationships, 45 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **simple-2fa-next** (657 symbols, 1523 relationships, 47 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 

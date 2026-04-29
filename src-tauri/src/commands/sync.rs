@@ -261,7 +261,7 @@ fn get_local_last_modified(state: &AppState) -> Result<Option<DateTime<Utc>>, Ap
 #[cfg(test)]
 mod tests {
     use rusqlite::Connection;
-    use secrecy::Secret;
+    use secrecy::SecretBox;
 
     use crate::{
         crypto::derive_key,
@@ -281,8 +281,8 @@ mod tests {
 
         let state = AppState::new(conn);
         *state.vault.lock().expect("vault") = Some(VaultState {
-            key: Secret::new(key),
-            master_password: Secret::new(password.to_owned()),
+            key: SecretBox::new(Box::new(key)),
+            master_password: SecretBox::new(Box::new(password.to_owned())),
         });
         state
     }

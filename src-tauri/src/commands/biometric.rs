@@ -1,4 +1,4 @@
-use secrecy::Secret;
+use secrecy::SecretBox;
 use tauri::State;
 
 use crate::{
@@ -43,8 +43,8 @@ pub fn unlock_with_biometric(
     let mut fixed = [0u8; 32];
     fixed.copy_from_slice(&key);
     *state.vault.lock().expect("vault lock poisoned") = Some(VaultState {
-        key: Secret::new(fixed),
-        master_password: Secret::new(String::new()),
+        key: SecretBox::new(Box::new(fixed)),
+        master_password: SecretBox::new(Box::new(String::new())),
     });
     Ok(())
 }

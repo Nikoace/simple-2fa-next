@@ -78,6 +78,21 @@ describe("AddAccountDialog", () => {
     expect(tauri.addAccount).not.toHaveBeenCalled();
   });
 
+  it("shows error message when addAccount throws", async () => {
+    const user = userEvent.setup();
+    vi.mocked(tauri.addAccount).mockRejectedValue(new Error("duplicate secret"));
+
+    render(<AddAccountDialog open onClose={onClose} />, { wrapper });
+    await user.type(screen.getByLabelText(/name|账户名称/i), "GitHub");
+    await user.type(screen.getByLabelText(/secret|密钥/i), "JBSWY3DPEHPK3PXP");
+    await user.click(screen.getByRole("button", { name: /add account|添加账户/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/duplicate secret/i)).toBeTruthy();
+    });
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
   it("calls onClose after successful submit", async () => {
     const user = userEvent.setup();
     vi.mocked(tauri.addAccount).mockResolvedValue({

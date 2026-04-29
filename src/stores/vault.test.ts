@@ -9,7 +9,14 @@ vi.mock("@/lib/tauri", () => ({
   lockVault: vi.fn(),
 }));
 
+vi.mock("@/stores/settings", () => ({
+  useSettingsStore: {
+    getState: vi.fn(() => ({ setBiometricEnabled: vi.fn() })),
+  },
+}));
+
 import * as tauriLib from "@/lib/tauri";
+import * as settingsStore from "@/stores/settings";
 import { useVaultStore } from "./vault";
 
 beforeEach(() => {
@@ -62,6 +69,18 @@ describe("useVaultStore", () => {
     await act(() => result.current.unlockByBiometric());
     expect(result.current.status).toBe("error");
     expect(result.current.error).toBeTruthy();
+  });
+
+  it("unlockByBiometric: calls setBiometricEnabled(false) when BiometricNotEnabled", async () => {
+    const mockSetBiometricEnabled = vi.fn();
+    vi.mocked(settingsStore.useSettingsStore.getState).mockReturnValue({
+      setBiometricEnabled: mockSetBiometricEnabled,
+    } as unknown as ReturnType<typeof settingsStore.useSettingsStore.getState>);
+    vi.mocked(tauriLib.unlockWithBiometric).mockRejectedValue({ kind: "BiometricNotEnabled" });
+    const { result } = renderHook(() => useVaultStore());
+    await act(() => result.current.unlockByBiometric());
+    expect(mockSetBiometricEnabled).toHaveBeenCalledWith(false);
+    expect(result.current.status).toBe("error");
   });
 
   it("checkStatus: sets error status on failure", async () => {

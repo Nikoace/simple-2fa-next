@@ -1,7 +1,7 @@
 export default {
   extends: ["@commitlint/config-conventional"],
   rules: {
-    "scope-enum": [2, "always", ["rust", "frontend", "config", "infra", "deps", "docs", "release"]],
+    "scope-enum": [2, "always", ["rust", "frontend", "config", "infra", "deps", "deps-dev", "docs", "release"]],
     "type-enum": [
       2,
       "always",

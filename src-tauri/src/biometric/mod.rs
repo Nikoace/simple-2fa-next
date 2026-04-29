@@ -35,46 +35,44 @@ fn map_keyring_err(err: keyring::Error) -> AppError {
 
 #[cfg(test)]
 mod tests {
-    use std::sync::{Mutex, OnceLock};
+    use std::sync::Mutex;
 
-    fn memory_store() -> &'static Mutex<Option<String>> {
-        static STORE: OnceLock<Mutex<Option<String>>> = OnceLock::new();
-        STORE.get_or_init(|| Mutex::new(None))
-    }
+    struct MemStore(Mutex<Option<String>>);
 
-    fn store_vault_key_mock(key: &[u8]) {
-        let mut slot = memory_store().lock().expect("lock must succeed");
-        *slot = Some(hex::encode(key));
-    }
-
-    fn load_vault_key_mock() -> Option<Vec<u8>> {
-        let slot = memory_store().lock().expect("lock must succeed");
-        slot.clone().and_then(|v| hex::decode(v).ok())
-    }
-
-    fn delete_vault_key_mock() {
-        let mut slot = memory_store().lock().expect("lock must succeed");
-        *slot = None;
+    impl MemStore {
+        fn new() -> Self {
+            Self(Mutex::new(None))
+        }
+        fn store(&self, key: &[u8]) {
+            *self.0.lock().unwrap() = Some(hex::encode(key));
+        }
+        fn load(&self) -> Option<Vec<u8>> {
+            self.0.lock().unwrap().clone().and_then(|v| hex::decode(v).ok())
+        }
+        fn delete(&self) {
+            *self.0.lock().unwrap() = None;
+        }
     }
 
     #[test]
     fn store_sets_value() {
-        store_vault_key_mock(&[1, 2, 3, 4]);
-        let value = memory_store().lock().expect("lock must succeed").clone();
-        assert_eq!(value.as_deref(), Some("01020304"));
+        let s = MemStore::new();
+        s.store(&[1, 2, 3, 4]);
+        assert_eq!(s.0.lock().unwrap().as_deref(), Some("01020304"));
     }
 
     #[test]
     fn load_returns_original_bytes() {
-        store_vault_key_mock(&[9, 8, 7]);
-        let loaded = load_vault_key_mock().expect("value should exist");
-        assert_eq!(loaded, vec![9, 8, 7]);
+        let s = MemStore::new();
+        s.store(&[9, 8, 7]);
+        assert_eq!(s.load().unwrap(), vec![9, 8, 7]);
     }
 
     #[test]
     fn delete_clears_value() {
-        store_vault_key_mock(&[5, 6]);
-        delete_vault_key_mock();
-        assert!(load_vault_key_mock().is_none());
+        let s = MemStore::new();
+        s.store(&[5, 6]);
+        s.delete();
+        assert!(s.load().is_none());
     }
 }

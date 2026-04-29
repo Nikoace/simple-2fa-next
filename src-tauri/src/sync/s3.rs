@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use object_store::{aws::AmazonS3Builder, path::Path, ObjectStore};
+use object_store::{aws::AmazonS3Builder, path::Path, ObjectStore, ObjectStoreExt};
 
 use crate::{error::AppError, sync::SyncProvider};
 

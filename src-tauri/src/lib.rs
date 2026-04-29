@@ -27,6 +27,8 @@ pub fn run() {
             let db_path = app_dir.join("accounts.db");
 
             let mut conn = rusqlite::Connection::open(&db_path).expect("failed to open database");
+            conn.execute_batch("PRAGMA journal_mode=WAL")
+                .expect("failed to set WAL mode");
             conn.execute_batch("PRAGMA foreign_keys = ON")
                 .expect("failed to enable foreign keys");
             run_migrations(&mut conn).expect("migration failed");

@@ -2,7 +2,7 @@ use aes_gcm::{
     aead::{Aead, KeyInit},
     Aes256Gcm, Nonce,
 };
-use rand::{rngs::OsRng, RngCore};
+use rand::RngCore;
 
 use crate::error::AppError;
 
@@ -12,7 +12,7 @@ const NONCE_LEN: usize = 12;
 pub fn seal(key: &[u8; 32], plaintext: &[u8]) -> Result<Vec<u8>, AppError> {
     let cipher = Aes256Gcm::new_from_slice(key).map_err(|e| AppError::Crypto(e.to_string()))?;
     let mut nonce_bytes = [0u8; NONCE_LEN];
-    OsRng.fill_bytes(&mut nonce_bytes);
+    rand::rng().fill_bytes(&mut nonce_bytes);
     let nonce = Nonce::from_slice(&nonce_bytes);
     let mut ct = cipher
         .encrypt(nonce, plaintext)

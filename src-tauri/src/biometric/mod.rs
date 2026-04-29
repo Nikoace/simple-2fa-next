@@ -47,7 +47,11 @@ mod tests {
             *self.0.lock().unwrap() = Some(hex::encode(key));
         }
         fn load(&self) -> Option<Vec<u8>> {
-            self.0.lock().unwrap().clone().and_then(|v| hex::decode(v).ok())
+            self.0
+                .lock()
+                .unwrap()
+                .clone()
+                .and_then(|v| hex::decode(v).ok())
         }
         fn delete(&self) {
             *self.0.lock().unwrap() = None;

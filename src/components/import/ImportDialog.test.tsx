@@ -79,6 +79,41 @@ describe("ImportDialog", () => {
     await waitFor(() => expect(tauri.commitImport).toHaveBeenCalledTimes(1));
   });
 
+  it("shows preview item without issuer prefix", async () => {
+    const user = userEvent.setup();
+    vi.mocked(tauri.parseOtpauthUri).mockResolvedValue({
+      name: "alice@example.com",
+      issuer: undefined,
+      secret: "JBSWY3DPEHPK3PXP",
+      algorithm: "SHA1",
+      digits: 6,
+      period: 30,
+    });
+
+    render(<ImportDialog open onClose={vi.fn()} />, { wrapper });
+    await user.click(screen.getByRole("button", { name: /uri/i }));
+    await user.type(screen.getByLabelText(/otpauth/i), "otpauth://totp/alice%40example.com");
+    await user.click(screen.getByRole("button", { name: /preview|预览/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText("alice@example.com")).toBeInTheDocument();
+    });
+  });
+
+  it("shows error message when parseOtpauthUri fails", async () => {
+    const user = userEvent.setup();
+    vi.mocked(tauri.parseOtpauthUri).mockRejectedValue(new Error("invalid uri"));
+
+    render(<ImportDialog open onClose={vi.fn()} />, { wrapper });
+    await user.click(screen.getByRole("button", { name: /uri/i }));
+    await user.type(screen.getByLabelText(/otpauth/i), "bad-uri");
+    await user.click(screen.getByRole("button", { name: /preview|预览/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/invalid uri/i)).toBeInTheDocument();
+    });
+  });
+
   it("parses uri and commits selected item", async () => {
     const user = userEvent.setup();
     vi.mocked(tauri.parseOtpauthUri).mockResolvedValue({

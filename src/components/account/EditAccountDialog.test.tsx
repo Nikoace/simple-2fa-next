@@ -72,4 +72,29 @@ describe("EditAccountDialog", () => {
     await user.click(screen.getByRole("button", { name: /save|保存/i }));
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
+
+  it("shows error message when updateAccount throws", async () => {
+    const user = userEvent.setup();
+    vi.mocked(tauri.updateAccount).mockRejectedValue(new Error("backend failure"));
+
+    render(<EditAccountDialog open account={account} onClose={onClose} />, { wrapper });
+    await user.click(screen.getByRole("button", { name: /save|保存/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/backend failure/i)).toBeTruthy();
+    });
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("shows generic error when updateAccount rejects with non-Error", async () => {
+    const user = userEvent.setup();
+    vi.mocked(tauri.updateAccount).mockRejectedValue("string error");
+
+    render(<EditAccountDialog open account={account} onClose={onClose} />, { wrapper });
+    await user.click(screen.getByRole("button", { name: /save|保存/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/something went wrong|出错了/i)).toBeTruthy();
+    });
+  });
 });

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/Nikoace/simple-2fa-next/compare/v0.1.1...v0.1.2) (2026-04-29)
+
+
+### Bug Fixes
+
+* **rust:** move PRAGMA journal_mode=WAL outside migration transaction ([#14](https://github.com/Nikoace/simple-2fa-next/issues/14)) ([39c1451](https://github.com/Nikoace/simple-2fa-next/commit/39c1451e77bb12bc0aef037ab4468ab9d15426de))
+
 ## [0.1.1](https://github.com/Nikoace/simple-2fa-next/compare/v0.1.0...v0.1.1) (2026-04-29)
 
 

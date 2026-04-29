@@ -34,9 +34,9 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "YOUR_PUBLIC_KEY_FROM_STEP_10.1",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDdFMjUyMzlCNDU4RTM0NTMKUldSVE5JNUZteU1sZm1qTlpaNUU5ZXUzTjdOYUUxamRnSVMrd2FWUlJUVW40RzJSQ1g5b3dFbHYK",
       "endpoints": [
-        "https://github.com/YOUR_USER/simple-2fa-next/releases/latest/download/latest.json"
+        "https://github.com/Nikoace/simple-2fa-next/releases/latest/download/latest.json"
       ]
     }
   }

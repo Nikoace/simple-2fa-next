@@ -1,6 +1,4 @@
 pub const SCHEMA_V1: &str = "
-PRAGMA journal_mode=WAL;
-
 CREATE TABLE IF NOT EXISTS meta (
     key   TEXT PRIMARY KEY,
     value TEXT NOT NULL

@@ -27,3 +27,5 @@ dist-ssr
 *.sln
 *.sw?
 .gitnexus
+coverage/
+.claude/scheduled_tasks.lock

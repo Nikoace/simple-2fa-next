@@ -135,6 +135,20 @@ describe("useScreenScan", () => {
     expect(result.current.result.status).toBe("error");
   });
 
+  it("transitions to error when thrown value has no message property", async () => {
+    vi.mocked(captureScreenFrame).mockRejectedValue("raw string error");
+    vi.mocked(jsQR).mockReturnValue(null);
+
+    const { result } = renderHook(() => useScreenScan());
+    await act(async () => {
+      await result.current.scan();
+    });
+    expect(result.current.result.status).toBe("error");
+    if (result.current.result.status === "error") {
+      expect(result.current.result.message).toBe("raw string error");
+    }
+  });
+
   it("reset returns to idle from not_found", async () => {
     vi.mocked(jsQR).mockReturnValue(null);
     const { result } = renderHook(() => useScreenScan());

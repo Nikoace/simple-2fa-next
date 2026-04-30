@@ -74,4 +74,30 @@ describe("captureScreenFrame", () => {
     await expect(captureScreenFrame(mockStream)).rejects.toThrow("capture failed");
     expect(mockTrack.stop).toHaveBeenCalled();
   });
+
+  it("rejects when canvas 2d context is unavailable", async () => {
+    HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(null);
+
+    await expect(captureScreenFrame(mockStream)).rejects.toThrow(
+      "canvas 2d context unavailable",
+    );
+    expect(mockTrack.stop).toHaveBeenCalled();
+  });
+
+  it("rejects when video has zero dimensions", async () => {
+    Object.defineProperty(HTMLVideoElement.prototype, "play", {
+      value: vi.fn().mockImplementation(function (this: HTMLVideoElement) {
+        Object.defineProperty(this, "videoWidth", { value: 0, configurable: true });
+        Object.defineProperty(this, "videoHeight", { value: 0, configurable: true });
+        setTimeout(() => this.dispatchEvent(new Event("loadedmetadata")), 0);
+        return Promise.resolve();
+      }),
+      configurable: true,
+    });
+
+    await expect(captureScreenFrame(mockStream)).rejects.toThrow(
+      "screen capture frame has no dimensions",
+    );
+    expect(mockTrack.stop).toHaveBeenCalled();
+  });
 });

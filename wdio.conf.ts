@@ -71,6 +71,9 @@ function buildEnv() {
   return {
     ...process.env,
     XDG_DATA_HOME: e2eDataDir,
+    // GTK4 (webkitgtk-4.1) defaults to Wayland; force X11 so xvfb works in CI.
+    GDK_BACKEND: "x11",
+    WEBKIT_DISABLE_COMPOSITING_MODE: "1",
   };
 }
 

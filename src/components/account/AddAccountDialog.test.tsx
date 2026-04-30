@@ -93,6 +93,13 @@ describe("AddAccountDialog", () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
+  it("renders the scan screen button", () => {
+    render(<AddAccountDialog open onClose={vi.fn()} />, { wrapper });
+    expect(
+      screen.getByRole("button", { name: /扫描屏幕|Scan Screen|画面をスキャン/i }),
+    ).toBeInTheDocument();
+  });
+
   it("calls onClose after successful submit", async () => {
     const user = userEvent.setup();
     vi.mocked(tauri.addAccount).mockResolvedValue({

@@ -121,6 +121,16 @@
   },
   "common": {
     "loading": "Loading…",
-    "error": "Something went wrong"
+    "error": "Something went wrong",
+    "back": "Back",
+    "or": "or"
+  },
+  "scan": {
+    "scan_screen": "Scan Screen",
+    "confirm_title": "Confirm Add Account",
+    "confirm_add": "Add",
+    "not_found": "No valid QR code detected",
+    "retry": "Retry",
+    "scanning": "Scanning…"
   }
 }

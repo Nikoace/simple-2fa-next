@@ -2,7 +2,7 @@ import jsQR from "jsqr";
 import { useState } from "react";
 
 import { captureScreenFrame } from "@/lib/screenCapture";
-import { parseOtpauthUri, type ImportAccountItem } from "@/lib/tauri";
+import { type ImportAccountItem, parseOtpauthUri } from "@/lib/tauri";
 
 type ScreenScanResult =
   | { status: "idle" }

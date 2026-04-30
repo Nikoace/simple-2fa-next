@@ -9,13 +9,13 @@ export async function captureScreenFrame(stream: MediaStream): Promise<ImageData
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext("2d");
       if (!ctx) {
-        stream.getTracks().forEach((t) => t.stop());
+        for (const t of stream.getTracks()) t.stop();
         reject(new Error("canvas 2d context unavailable"));
         return;
       }
       ctx.drawImage(video, 0, 0);
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      stream.getTracks().forEach((t) => t.stop());
+      for (const t of stream.getTracks()) t.stop();
       resolve(imageData);
     });
 

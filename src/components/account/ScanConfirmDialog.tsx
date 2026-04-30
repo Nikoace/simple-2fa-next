@@ -22,7 +22,12 @@ export function ScanConfirmDialog({ item, onConfirm, onCancel }: Props) {
   if (!item) return null;
 
   return (
-    <Dialog open onOpenChange={(open) => { if (!open) onCancel(); }}>
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onCancel();
+      }}
+    >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{t("scan.confirm_title")}</DialogTitle>

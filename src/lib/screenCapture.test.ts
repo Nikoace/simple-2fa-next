@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { captureScreenFrame } from "@/lib/screenCapture";
 
 if (typeof ImageData === "undefined") {
@@ -28,9 +28,7 @@ describe("captureScreenFrame", () => {
     // Mock canvas getContext
     HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue({
       drawImage: vi.fn(),
-      getImageData: vi.fn().mockReturnValue(
-        new ImageData(new Uint8ClampedArray(4), 1, 1),
-      ),
+      getImageData: vi.fn().mockReturnValue(new ImageData(new Uint8ClampedArray(4), 1, 1)),
     });
 
     // Mock video play and dimensions

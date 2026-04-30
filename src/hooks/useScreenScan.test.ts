@@ -1,5 +1,5 @@
-import { renderHook, act } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { act, renderHook } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("jsqr");
 vi.mock("@/lib/screenCapture");
@@ -8,9 +8,9 @@ vi.mock("@/lib/tauri", () => ({
 }));
 
 import jsQR from "jsqr";
+import { useScreenScan } from "@/hooks/useScreenScan";
 import { captureScreenFrame } from "@/lib/screenCapture";
 import { parseOtpauthUri } from "@/lib/tauri";
-import { useScreenScan } from "@/hooks/useScreenScan";
 
 if (typeof ImageData === "undefined") {
   (globalThis as Record<string, unknown>).ImageData = class {
@@ -61,7 +61,9 @@ describe("useScreenScan", () => {
   it("transitions to not_found when jsQR returns null", async () => {
     vi.mocked(jsQR).mockReturnValue(null);
     const { result } = renderHook(() => useScreenScan());
-    await act(async () => { await result.current.scan(); });
+    await act(async () => {
+      await result.current.scan();
+    });
     expect(result.current.result.status).toBe("not_found");
   });
 
@@ -72,7 +74,9 @@ describe("useScreenScan", () => {
     vi.mocked(parseOtpauthUri).mockResolvedValue(MOCK_ITEM);
 
     const { result } = renderHook(() => useScreenScan());
-    await act(async () => { await result.current.scan(); });
+    await act(async () => {
+      await result.current.scan();
+    });
 
     expect(result.current.result.status).toBe("found");
     if (result.current.result.status === "found") {
@@ -85,7 +89,9 @@ describe("useScreenScan", () => {
     vi.mocked(navigator.mediaDevices.getDisplayMedia).mockRejectedValue(err);
 
     const { result } = renderHook(() => useScreenScan());
-    await act(async () => { await result.current.scan(); });
+    await act(async () => {
+      await result.current.scan();
+    });
     expect(result.current.result.status).toBe("idle");
   });
 
@@ -94,7 +100,9 @@ describe("useScreenScan", () => {
     vi.mocked(navigator.mediaDevices.getDisplayMedia).mockRejectedValue(err);
 
     const { result } = renderHook(() => useScreenScan());
-    await act(async () => { await result.current.scan(); });
+    await act(async () => {
+      await result.current.scan();
+    });
     expect(result.current.result.status).toBe("idle");
   });
 
@@ -105,16 +113,22 @@ describe("useScreenScan", () => {
     vi.mocked(jsQR).mockReturnValue(null);
 
     const { result } = renderHook(() => useScreenScan());
-    await act(async () => { await result.current.scan(); });
+    await act(async () => {
+      await result.current.scan();
+    });
     expect(result.current.result.status).toBe("error");
   });
 
   it("reset returns to idle from not_found", async () => {
     vi.mocked(jsQR).mockReturnValue(null);
     const { result } = renderHook(() => useScreenScan());
-    await act(async () => { await result.current.scan(); });
+    await act(async () => {
+      await result.current.scan();
+    });
     expect(result.current.result.status).toBe("not_found");
-    act(() => { result.current.reset(); });
+    act(() => {
+      result.current.reset();
+    });
     expect(result.current.result.status).toBe("idle");
   });
 });

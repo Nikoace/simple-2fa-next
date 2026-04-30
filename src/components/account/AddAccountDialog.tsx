@@ -118,9 +118,7 @@ export function AddAccountDialog({ open, onClose }: Props) {
             onClick={() => void scan()}
           >
             <ScanLine className="mr-2 size-4" />
-            {scanResult.status === "scanning"
-              ? t("scan.scanning")
-              : t("scan.scan_screen")}
+            {scanResult.status === "scanning" ? t("scan.scanning") : t("scan.scan_screen")}
           </Button>
 
           {scanResult.status === "not_found" && (
@@ -138,16 +136,12 @@ export function AddAccountDialog({ open, onClose }: Props) {
           )}
 
           {scanResult.status === "error" && (
-            <p className="text-center text-sm text-destructive">
-              {scanResult.message}
-            </p>
+            <p className="text-center text-sm text-destructive">{scanResult.message}</p>
           )}
 
           <div className="relative flex items-center gap-2 py-1">
             <div className="flex-1 border-t" />
-            <span className="text-xs text-muted-foreground">
-              {t("common.or")}
-            </span>
+            <span className="text-xs text-muted-foreground">{t("common.or")}</span>
             <div className="flex-1 border-t" />
           </div>
 

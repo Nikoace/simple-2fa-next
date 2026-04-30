@@ -78,9 +78,7 @@ describe("captureScreenFrame", () => {
   it("rejects when canvas 2d context is unavailable", async () => {
     HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(null);
 
-    await expect(captureScreenFrame(mockStream)).rejects.toThrow(
-      "canvas 2d context unavailable",
-    );
+    await expect(captureScreenFrame(mockStream)).rejects.toThrow("canvas 2d context unavailable");
     expect(mockTrack.stop).toHaveBeenCalled();
   });
 

@@ -13,8 +13,15 @@ type ScreenScanResult =
 
 export function useScreenScan() {
   const [result, setResult] = useState<ScreenScanResult>({ status: "idle" });
+  const isSupported =
+    typeof navigator !== "undefined" && Boolean(navigator.mediaDevices?.getDisplayMedia);
 
   async function scan() {
+    if (!isSupported) {
+      setResult({ status: "error", message: "screen capture is not supported" });
+      return;
+    }
+
     setResult({ status: "scanning" });
     try {
       const stream = await navigator.mediaDevices.getDisplayMedia({
@@ -49,5 +56,5 @@ export function useScreenScan() {
     setResult({ status: "idle" });
   }
 
-  return { result, scan, reset };
+  return { result, scan, reset, isSupported };
 }

@@ -8,6 +8,16 @@
 
 **Tech Stack:** jsqr (QR decode), `getDisplayMedia` Web API, Vitest + @testing-library/react
 
+## Post-review hardening applied
+
+- [x] Stop display-media tracks on successful capture, playback failure, frame-capture failure, and metadata timeout.
+- [x] Disable screen scanning when `getDisplayMedia` is unavailable and expose localized unsupported copy.
+- [x] Reset scan state when the add-account dialog closes.
+- [x] Avoid stacked modal traps by hiding the add-account dialog while scan confirmation is open.
+- [x] Show confirmation errors when adding a scanned account fails instead of dropping the rejected promise.
+- [x] Validate scanned/imported TOTP algorithm, digits, and period before adding an account.
+- [x] Add focused tests for cleanup, unsupported capture, confirmation failure, and invalid otpauth parameters.
+
 ---
 
 ## File Map

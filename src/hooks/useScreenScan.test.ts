@@ -56,6 +56,7 @@ describe("useScreenScan", () => {
   it("starts idle", () => {
     const { result } = renderHook(() => useScreenScan());
     expect(result.current.result.status).toBe("idle");
+    expect(result.current.isSupported).toBe(true);
   });
 
   it("transitions to not_found when jsQR returns null", async () => {
@@ -104,6 +105,21 @@ describe("useScreenScan", () => {
       await result.current.scan();
     });
     expect(result.current.result.status).toBe("idle");
+  });
+
+  it("returns an error when screen capture is unsupported", async () => {
+    Object.defineProperty(navigator, "mediaDevices", {
+      value: undefined,
+      configurable: true,
+    });
+
+    const { result } = renderHook(() => useScreenScan());
+    expect(result.current.isSupported).toBe(false);
+
+    await act(async () => {
+      await result.current.scan();
+    });
+    expect(result.current.result.status).toBe("error");
   });
 
   it("transitions to error on unexpected failure", async () => {

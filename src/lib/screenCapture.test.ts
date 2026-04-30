@@ -52,4 +52,26 @@ describe("captureScreenFrame", () => {
     await captureScreenFrame(mockStream);
     expect(mockTrack.stop).toHaveBeenCalled();
   });
+
+  it("stops all tracks when video playback fails", async () => {
+    Object.defineProperty(HTMLVideoElement.prototype, "play", {
+      value: vi.fn().mockRejectedValue(new Error("play failed")),
+      configurable: true,
+    });
+
+    await expect(captureScreenFrame(mockStream)).rejects.toThrow("play failed");
+    expect(mockTrack.stop).toHaveBeenCalled();
+  });
+
+  it("stops all tracks when frame capture fails", async () => {
+    HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue({
+      drawImage: vi.fn(),
+      getImageData: vi.fn(() => {
+        throw new Error("capture failed");
+      }),
+    });
+
+    await expect(captureScreenFrame(mockStream)).rejects.toThrow("capture failed");
+    expect(mockTrack.stop).toHaveBeenCalled();
+  });
 });

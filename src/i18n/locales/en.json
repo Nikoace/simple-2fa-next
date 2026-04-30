@@ -131,6 +131,7 @@
     "confirm_add": "Add",
     "not_found": "No valid QR code detected",
     "retry": "Retry",
-    "scanning": "Scanning…"
+    "scanning": "Scanning…",
+    "unsupported": "Screen scanning is not supported in this environment"
   }
 }

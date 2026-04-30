@@ -14,9 +14,17 @@ type Props = {
   item: ImportAccountItem | null;
   onConfirm: (item: ImportAccountItem) => void;
   onCancel: () => void;
+  error?: string | null;
+  isSubmitting?: boolean;
 };
 
-export function ScanConfirmDialog({ item, onConfirm, onCancel }: Props) {
+export function ScanConfirmDialog({
+  item,
+  onConfirm,
+  onCancel,
+  error,
+  isSubmitting = false,
+}: Props) {
   const { t } = useTranslation();
 
   if (!item) return null;
@@ -25,7 +33,7 @@ export function ScanConfirmDialog({ item, onConfirm, onCancel }: Props) {
     <Dialog
       open
       onOpenChange={(open) => {
-        if (!open) onCancel();
+        if (!open && !isSubmitting) onCancel();
       }}
     >
       <DialogContent className="sm:max-w-md">
@@ -58,11 +66,13 @@ export function ScanConfirmDialog({ item, onConfirm, onCancel }: Props) {
           </p>
         </div>
 
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+
         <DialogFooter>
-          <Button type="button" variant="ghost" onClick={onCancel}>
+          <Button type="button" variant="ghost" disabled={isSubmitting} onClick={onCancel}>
             {t("accounts.cancel")}
           </Button>
-          <Button type="button" onClick={() => onConfirm(item)}>
+          <Button type="button" disabled={isSubmitting} onClick={() => onConfirm(item)}>
             {t("scan.confirm_add")}
           </Button>
         </DialogFooter>

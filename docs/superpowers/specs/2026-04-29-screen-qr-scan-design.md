@@ -89,7 +89,9 @@ Confirm → caller invokes `addAccount`, closes both dialogs.
 | User cancels OS picker | Catch `AbortError`/`NotAllowedError` → stay idle, no error shown |
 | No QR in frame | Inline: "未检测到有效 QR 码" + 重试 button |
 | Invalid otpauth URI | Show error message from `parseOtpauthUri` rejection |
-| `getDisplayMedia` not supported | Button disabled with tooltip (fallback for unsupported envs) |
+| Invalid TOTP parameters | Reject unsupported algorithm, digits outside 6-8, or period outside 15-300 before adding |
+| `getDisplayMedia` not supported | Button disabled with localized browser title fallback for unsupported envs |
+| Add after scan fails | Keep confirmation dialog open and show the add error inline |
 
 ## Testing
 

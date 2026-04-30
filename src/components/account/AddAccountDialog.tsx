@@ -46,7 +46,12 @@ type Props = {
 export function AddAccountDialog({ open, onClose }: Props) {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const { result: scanResult, scan, reset: resetScan } = useScreenScan();
+  const {
+    result: scanResult,
+    scan,
+    reset: resetScan,
+    isSupported: isScreenScanSupported,
+  } = useScreenScan();
 
   const form = useForm<FormInput, unknown, FormOutput>({
     resolver: zodResolver(schema),
@@ -63,12 +68,31 @@ export function AddAccountDialog({ open, onClose }: Props) {
 
   const { isSubmitting, isValid } = form.formState;
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [scanSubmitError, setScanSubmitError] = useState<string | null>(null);
+  const [isScanSubmitting, setIsScanSubmitting] = useState(false);
 
   function messageFor(errorMessage: unknown) {
     if (typeof errorMessage !== "string") {
       return "";
     }
     return t(`accounts.${errorMessage}`);
+  }
+
+  function errorMessageFor(err: unknown) {
+    if (err instanceof Error) return err.message;
+    if (typeof err === "string") return err;
+    return t("common.error");
+  }
+
+  function handleClose() {
+    setScanSubmitError(null);
+    resetScan();
+    onClose();
+  }
+
+  function handleScanCancel() {
+    setScanSubmitError(null);
+    resetScan();
   }
 
   async function onSubmit(values: FormOutput) {
@@ -81,29 +105,41 @@ export function AddAccountDialog({ open, onClose }: Props) {
       });
       await qc.invalidateQueries({ queryKey: ["accounts"] });
       form.reset();
+      resetScan();
       onClose();
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : t("common.error"));
+      setSubmitError(errorMessageFor(err));
     }
   }
 
   async function handleScanConfirm(item: ImportAccountItem) {
-    await addAccount({
-      name: item.name,
-      issuer: item.issuer,
-      secret: item.secret,
-      algorithm: item.algorithm,
-      digits: item.digits,
-      period: item.period,
-    });
-    await qc.invalidateQueries({ queryKey: ["accounts"] });
-    resetScan();
-    onClose();
+    setScanSubmitError(null);
+    setIsScanSubmitting(true);
+    try {
+      await addAccount({
+        name: item.name,
+        issuer: item.issuer,
+        secret: item.secret,
+        algorithm: item.algorithm,
+        digits: item.digits,
+        period: item.period,
+      });
+      await qc.invalidateQueries({ queryKey: ["accounts"] });
+      resetScan();
+      onClose();
+    } catch (err) {
+      setScanSubmitError(errorMessageFor(err));
+    } finally {
+      setIsScanSubmitting(false);
+    }
   }
 
   return (
     <>
-      <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
+      <Dialog
+        open={open && scanResult.status !== "found"}
+        onOpenChange={(nextOpen) => !nextOpen && handleClose()}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{t("accounts.add")}</DialogTitle>
@@ -114,8 +150,12 @@ export function AddAccountDialog({ open, onClose }: Props) {
             variant="outline"
             className="w-full"
             aria-label={t("scan.scan_screen")}
-            disabled={scanResult.status === "scanning"}
-            onClick={() => void scan()}
+            title={!isScreenScanSupported ? t("scan.unsupported") : undefined}
+            disabled={!isScreenScanSupported || scanResult.status === "scanning"}
+            onClick={() => {
+              setScanSubmitError(null);
+              void scan();
+            }}
           >
             <ScanLine className="mr-2 size-4" />
             {scanResult.status === "scanning" ? t("scan.scanning") : t("scan.scan_screen")}
@@ -128,7 +168,10 @@ export function AddAccountDialog({ open, onClose }: Props) {
                 type="button"
                 variant="ghost"
                 className="ml-1 h-auto p-0 text-sm"
-                onClick={() => void scan()}
+                onClick={() => {
+                  setScanSubmitError(null);
+                  void scan();
+                }}
               >
                 {t("scan.retry")}
               </Button>
@@ -251,7 +294,7 @@ export function AddAccountDialog({ open, onClose }: Props) {
                 type="button"
                 variant="ghost"
                 data-testid="cancel-add-account"
-                onClick={onClose}
+                onClick={handleClose}
               >
                 {t("accounts.cancel")}
               </Button>
@@ -268,9 +311,11 @@ export function AddAccountDialog({ open, onClose }: Props) {
       </Dialog>
 
       <ScanConfirmDialog
-        item={scanResult.status === "found" ? scanResult.item : null}
+        item={open && scanResult.status === "found" ? scanResult.item : null}
         onConfirm={(item) => void handleScanConfirm(item)}
-        onCancel={resetScan}
+        onCancel={handleScanCancel}
+        error={scanSubmitError}
+        isSubmitting={isScanSubmitting}
       />
     </>
   );

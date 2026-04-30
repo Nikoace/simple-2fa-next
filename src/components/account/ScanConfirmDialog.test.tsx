@@ -39,4 +39,22 @@ describe("ScanConfirmDialog", () => {
     await userEvent.click(screen.getByRole("button", { name: /取消|Cancel|キャンセル/i }));
     expect(onCancel).toHaveBeenCalled();
   });
+
+  it("shows confirmation errors", () => {
+    render(
+      <ScanConfirmDialog
+        item={ITEM}
+        onConfirm={vi.fn()}
+        onCancel={vi.fn()}
+        error="duplicate secret"
+      />,
+    );
+    expect(screen.getByText("duplicate secret")).toBeInTheDocument();
+  });
+
+  it("disables actions while submitting", () => {
+    render(<ScanConfirmDialog item={ITEM} onConfirm={vi.fn()} onCancel={vi.fn()} isSubmitting />);
+    expect(screen.getByRole("button", { name: /添加|Add|追加/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /取消|Cancel|キャンセル/i })).toBeDisabled();
+  });
 });

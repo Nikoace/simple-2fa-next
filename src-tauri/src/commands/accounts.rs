@@ -93,6 +93,15 @@ pub fn add_account(
     let db = state.db.lock().expect("db lock poisoned");
     let repo = AccountRepo(&db);
 
+    let algorithm = input
+        .algorithm
+        .as_deref()
+        .map(|s| s.trim().to_ascii_uppercase())
+        .filter(|s| !s.is_empty())
+        .unwrap_or_else(|| "SHA1".to_string());
+    let digits = input.digits.unwrap_or(6);
+    let period = input.period.unwrap_or(30);
+    validate_totp_params(&algorithm, digits, period)?;
     let normalized = normalize_secret(&input.secret);
     let mut secret_bytes = decode_base32_lenient(&normalized)
         .map_err(|_| AppError::InvalidInput("invalid base32 secret".into()))?;
@@ -103,9 +112,9 @@ pub fn add_account(
         name: input.name,
         issuer: input.issuer,
         secret_cipher,
-        algorithm: input.algorithm,
-        digits: input.digits,
-        period: input.period,
+        algorithm: Some(algorithm),
+        digits: Some(digits),
+        period: Some(period),
         icon: input.icon,
         color: input.color,
         group_id: input.group_id,
@@ -114,6 +123,25 @@ pub fn add_account(
     let out = get_account_with_code(&acc, &secret_bytes);
     secret_bytes.zeroize();
     out
+}
+
+fn validate_totp_params(algorithm: &str, digits: u8, period: u32) -> Result<(), AppError> {
+    if !matches!(algorithm, "SHA1" | "SHA256" | "SHA512") {
+        return Err(AppError::InvalidInput(format!(
+            "unsupported algorithm: {algorithm}"
+        )));
+    }
+    if !(6..=8).contains(&digits) {
+        return Err(AppError::InvalidInput(
+            "digits must be between 6 and 8".into(),
+        ));
+    }
+    if !(15..=300).contains(&period) {
+        return Err(AppError::InvalidInput(
+            "period must be between 15 and 300".into(),
+        ));
+    }
+    Ok(())
 }
 
 #[tauri::command]
@@ -180,4 +208,33 @@ fn get_account_with_code(acc: &Account, secret_bytes: &[u8]) -> Result<AccountWi
         ttl,
         progress: ttl as f32 / period as f32,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn validate_totp_params_accepts_supported_values() {
+        assert!(validate_totp_params("SHA1", 6, 30).is_ok());
+        assert!(validate_totp_params("SHA256", 7, 45).is_ok());
+        assert!(validate_totp_params("SHA512", 8, 300).is_ok());
+    }
+
+    #[test]
+    fn validate_totp_params_rejects_unsupported_algorithm() {
+        assert!(validate_totp_params("MD5", 6, 30).is_err());
+    }
+
+    #[test]
+    fn validate_totp_params_rejects_digits_out_of_range() {
+        assert!(validate_totp_params("SHA1", 5, 30).is_err());
+        assert!(validate_totp_params("SHA1", 9, 30).is_err());
+    }
+
+    #[test]
+    fn validate_totp_params_rejects_period_out_of_range() {
+        assert!(validate_totp_params("SHA1", 6, 0).is_err());
+        assert!(validate_totp_params("SHA1", 6, 301).is_err());
+    }
 }

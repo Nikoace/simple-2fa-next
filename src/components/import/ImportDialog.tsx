@@ -22,6 +22,13 @@ type Props = {
 
 type Mode = "file" | "uri";
 
+function toErrorMessage(e: unknown): string {
+  if (typeof e === "string") return e;
+  if (e && typeof e === "object" && "message" in e)
+    return String((e as { message: unknown }).message);
+  return String(e);
+}
+
 export function ImportDialog({ open: isOpen, onClose }: Props) {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -71,7 +78,7 @@ export function ImportDialog({ open: isOpen, onClose }: Props) {
       setPreviewItems(preview.items);
       setSelected(new Set(preview.items.map((_, index) => index)));
     } catch (e) {
-      setError(String(e));
+      setError(toErrorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -89,7 +96,7 @@ export function ImportDialog({ open: isOpen, onClose }: Props) {
       setPreviewItems([item]);
       setSelected(new Set([0]));
     } catch (e) {
-      setError(String(e));
+      setError(toErrorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -119,7 +126,7 @@ export function ImportDialog({ open: isOpen, onClose }: Props) {
       resetState();
       onClose();
     } catch (e) {
-      setError(String(e));
+      setError(toErrorMessage(e));
     } finally {
       setBusy(false);
     }

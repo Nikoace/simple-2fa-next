@@ -36,6 +36,7 @@
     "cmdk": "^1.1.1",
     "framer-motion": "^12.38.0",
     "i18next": "^26.0.6",
+    "jsqr": "^1.4.0",
     "lucide-react": "^1.8.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

@@ -7,7 +7,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/tauri", () => ({
   addAccount: vi.fn(),
 }));
+vi.mock("@/hooks/useScreenScan", () => ({
+  useScreenScan: vi.fn(),
+}));
 
+import { useScreenScan } from "@/hooks/useScreenScan";
 import * as tauri from "@/lib/tauri";
 import { AddAccountDialog } from "./AddAccountDialog";
 
@@ -17,9 +21,24 @@ function wrapper({ children }: { children: ReactNode }) {
 }
 
 const onClose = vi.fn();
+const screenScanIdle = {
+  result: { status: "idle" as const },
+  scan: vi.fn(),
+  reset: vi.fn(),
+  isSupported: true,
+};
+const scannedItem = {
+  name: "alice@example.com",
+  issuer: "GitHub",
+  secret: "JBSWY3DPEHPK3PXP",
+  algorithm: "SHA1",
+  digits: 6,
+  period: 30,
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.mocked(useScreenScan).mockReturnValue(screenScanIdle);
 });
 
 describe("AddAccountDialog", () => {
@@ -89,6 +108,44 @@ describe("AddAccountDialog", () => {
 
     await waitFor(() => {
       expect(screen.getByText(/duplicate secret/i)).toBeTruthy();
+    });
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("renders the scan screen button", () => {
+    render(<AddAccountDialog open onClose={vi.fn()} />, { wrapper });
+    expect(
+      screen.getByRole("button", { name: /扫描屏幕|Scan Screen|画面をスキャン/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("disables the scan button when screen capture is unsupported", () => {
+    vi.mocked(useScreenScan).mockReturnValue({
+      ...screenScanIdle,
+      isSupported: false,
+    });
+
+    render(<AddAccountDialog open onClose={vi.fn()} />, { wrapper });
+
+    expect(
+      screen.getByRole("button", { name: /扫描屏幕|Scan Screen|画面をスキャン/i }),
+    ).toBeDisabled();
+  });
+
+  it("shows an error when scanned account confirmation fails", async () => {
+    const user = userEvent.setup();
+    vi.mocked(useScreenScan).mockReturnValue({
+      ...screenScanIdle,
+      result: { status: "found", item: scannedItem },
+    });
+    vi.mocked(tauri.addAccount).mockRejectedValue(new Error("duplicate secret"));
+
+    render(<AddAccountDialog open onClose={onClose} />, { wrapper });
+
+    await user.click(screen.getByRole("button", { name: /添加|Add|追加/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/duplicate secret/i)).toBeInTheDocument();
     });
     expect(onClose).not.toHaveBeenCalled();
   });

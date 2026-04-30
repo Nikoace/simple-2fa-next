@@ -121,6 +121,17 @@
   },
   "common": {
     "loading": "加载中…",
-    "error": "出错了"
+    "error": "出错了",
+    "back": "返回",
+    "or": "或"
+  },
+  "scan": {
+    "scan_screen": "扫描屏幕",
+    "confirm_title": "确认添加账户",
+    "confirm_add": "添加",
+    "not_found": "未检测到有效 QR 码",
+    "retry": "重试",
+    "scanning": "正在扫描…",
+    "unsupported": "当前环境不支持屏幕扫描"
   }
 }

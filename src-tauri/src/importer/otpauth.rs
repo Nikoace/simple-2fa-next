@@ -60,6 +60,7 @@ pub fn parse_otpauth_uri(uri: &str) -> Result<ImportAccountItem, AppError> {
         })
         .transpose()?
         .unwrap_or(30);
+    validate_totp_params(&algorithm, digits, period)?;
 
     Ok(ImportAccountItem {
         name,
@@ -91,4 +92,19 @@ fn split_label(label: &str) -> Result<(Option<&str>, &str), AppError> {
         }
         Ok((None, name))
     }
+}
+
+fn validate_totp_params(algorithm: &str, digits: u8, period: u32) -> Result<(), AppError> {
+    if !matches!(algorithm, "SHA1" | "SHA256" | "SHA512") {
+        return Err(AppError::Import(format!(
+            "unsupported algorithm: {algorithm}"
+        )));
+    }
+    if !(6..=8).contains(&digits) {
+        return Err(AppError::Import("digits must be between 6 and 8".into()));
+    }
+    if !(15..=300).contains(&period) {
+        return Err(AppError::Import("period must be between 15 and 300".into()));
+    }
+    Ok(())
 }

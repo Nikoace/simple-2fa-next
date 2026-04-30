@@ -1,4 +1,5 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -18,6 +19,7 @@ import { useSettingsStore } from "@/stores/settings";
 
 export function SettingsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const biometricEnabled = useSettingsStore((s) => s.biometricEnabled);
   const setBiometricEnabled = useSettingsStore((s) => s.setBiometricEnabled);
   const [available, setAvailable] = useState<boolean | null>(null);
@@ -66,6 +68,14 @@ export function SettingsPage() {
 
   return (
     <Card className="mx-auto mt-8 max-w-xl p-6">
+      <button
+        type="button"
+        onClick={() => void navigate({ to: "/" })}
+        className="mb-4 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="size-4" />
+        {t("common.back")}
+      </button>
       <h2 className="text-xl font-semibold">{t("settings.title")}</h2>
       <p className="mt-1 text-sm text-muted-foreground">{t("settings.description")}</p>
 

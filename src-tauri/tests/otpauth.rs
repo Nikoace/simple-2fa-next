@@ -36,3 +36,21 @@ fn parse_rejects_non_totp_uri() {
     let uri = "https://example.com?secret=JBSWY3DPEHPK3PXP";
     assert!(parse_otpauth_uri(uri).is_err());
 }
+
+#[test]
+fn parse_rejects_unsupported_algorithm() {
+    let uri = "otpauth://totp/GitHub:alice@example.com?secret=JBSWY3DPEHPK3PXP&algorithm=MD5";
+    assert!(parse_otpauth_uri(uri).is_err());
+}
+
+#[test]
+fn parse_rejects_digits_out_of_range() {
+    let uri = "otpauth://totp/GitHub:alice@example.com?secret=JBSWY3DPEHPK3PXP&digits=9";
+    assert!(parse_otpauth_uri(uri).is_err());
+}
+
+#[test]
+fn parse_rejects_period_out_of_range() {
+    let uri = "otpauth://totp/GitHub:alice@example.com?secret=JBSWY3DPEHPK3PXP&period=0";
+    assert!(parse_otpauth_uri(uri).is_err());
+}

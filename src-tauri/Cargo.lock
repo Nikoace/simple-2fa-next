@@ -4317,7 +4317,7 @@ dependencies = [
  "keyring",
  "object_store",
  "proptest",
- "rand 0.9.4",
+ "rand 0.10.1",
  "reqwest 0.12.28",
  "rusqlite",
  "secrecy",
